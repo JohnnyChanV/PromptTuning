@@ -119,8 +119,8 @@ def prepare_train_data(
     if args.train_dimension_filter != None:
         new_data = [item for item in data if item['Dimension.Name'] in eval(args.train_dimension_filter)]
         data = new_data
-    cnt = Counter([item["Dimension.Name"] for item in data])
-    print(f"[Info] Dimension.Name distribution (top 10): {cnt.most_common(10)}")
+    cnt = Counter([item["sem_label"] for item in data])
+    print(f"[Info] label distribution (top 10): {cnt.most_common(10)}")
     return data[:100]
 
 
