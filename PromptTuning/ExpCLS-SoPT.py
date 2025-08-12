@@ -7,7 +7,7 @@ import torch
 from datasets import load_dataset, Dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
-
+from collections import Counter
 from tqdm import tqdm
 
 NUM_SPECIAL_TOKENS_IN_PREFIX = 30
@@ -65,19 +65,22 @@ else:
 
 #----------
 
-train_data = json.load(open("RAG_data/proc_ret_data.json",'r'))
+train_data = json.load(open("RAG_data/proc_dev_data.json",'r'))
+
 for item in train_data:
     item['sem_label'] = SEMANTIC_LABEL[item['label']]
-    del item['Dimension.Name']
+    item['Dimension.Name'] = str(item['Dimension.Name'])
 
-test_data = json.load(open("RAG_data/proc_test_data.json",'r'))
-for item in test_data:
-    item['sem_label'] = SEMANTIC_LABEL[item['label']]
-    del item['Dimension.Name']
-#----------
+Counter([item['Dimension.Name'] for item in train_data])
+
+# test_data = json.load(open("RAG_data/proc_test_data.json",'r'))
+# for item in test_data:
+#     item['sem_label'] = SEMANTIC_LABEL[item['label']]
+#     item['Dimension.Name'] = str(item['Dimension.Name'])
+# #----------
 
 train_dataset = Dataset.from_list(train_data).shuffle(seed=42)
-test_dataset = Dataset.from_list(test_data)
+# test_dataset = Dataset.from_list(test_data)
 
 #----------
 system_prompt = open("good_prompt.txt").read()
@@ -98,30 +101,25 @@ def parse_value_from_xml_with_regex(xml_string, tag_name):
         return ""
 #----------
 
-def create_test_messages(row):
-    # row['messages'] = [
-    #     {"role": "system", "content": system_prompt},
-    #     {"role": "user", "content": prompt_template.format(row["input"])}
-    # ]
-    return {"messages": [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": prompt_template.format(row["input"])}
-    ]}
-
-test_dataset_no_prefix = test_dataset.map(create_test_messages)
+# def create_test_messages(row):
+#     # row['messages'] = [
+#     #     {"role": "system", "content": system_prompt},
+#     #     {"role": "user", "content": prompt_template.format(row["input"])}
+#     # ]
+#     return {"messages": [
+#         {"role": "system", "content": system_prompt},
+#         {"role": "user", "content": prompt_template.format(row["input"])}
+#     ]}
+#
+# test_dataset_no_prefix = test_dataset.map(create_test_messages)
 
 
 #----------Train
 
-# Setting hyperparameters
-
-
 
 # prefix will be comprised of n special tokens 
 prefix = "".join(prefix_token_strs[:NUM_SPECIAL_TOKENS_IN_PREFIX])
-system_prompt = system_prompt + prefix
-# We create a training dataset that includes the answer
-# We also create another test dataset, this time with the prefix for the finetuned model
+system_prompt = prefix + system_prompt
 
 def create_prefix_messages(row):
     return {"text": 
@@ -150,7 +148,7 @@ def create_prefix_messages_no_answer(row):
 
 
 train_dataset = train_dataset.map(create_prefix_messages)
-test_dataset_with_prefix = test_dataset.map(create_prefix_messages_no_answer)
+# test_dataset_with_prefix = test_dataset.map(create_prefix_messages_no_answer)
 
 # train_dataset[:2]
 
@@ -263,50 +261,50 @@ model.eval()
 
 # -----------
 
-
-# Running on sample of test dataset; this time with the newly trained prefix
-
-pred_ls, golden_ls = [], []
-num_correct, num_total = 0, 0
-
-# for i in tqdm(range(len(test_dataset_no_prefix))):
-for i in tqdm(range(10)):
-    messages = test_dataset_with_prefix[i]["message"]
-    
-    input_ids = tokenizer.apply_chat_template(
-        messages,
-        add_generation_prompt=True,
-        enable_thinking=False,
-        return_tensors="pt",
-    ).to(model.device)
-    
-    outputs = model.generate(
-        input_ids,
-        max_new_tokens=128,
-        # eos_token_id=terminators,
-        do_sample=False,
-        # temperature=0.6,
-        # top_p=0,
-        pad_token_id=tokenizer.eos_token_id,
-        # past_key_value=None
-    )
-    
-    response = outputs[0][input_ids.shape[-1]:]
-    response = tokenizer.decode(response, skip_special_tokens=False)
-    print(response)
-    pred = parse_value_from_xml_with_regex(response, "answer")
-    
-    pred_ls.append(pred)
-    golden_ls.append(test_dataset_no_prefix[i]["sem_label"])
-    
-    if pred == test_dataset_no_prefix[i]["sem_label"]:
-        num_correct += 1
-    num_total += 1
-
-accuracy = num_correct / num_total
-print(f"Accuracy: {accuracy}")
-
-# print(response)
+#
+# # Running on sample of test dataset; this time with the newly trained prefix
+#
+# pred_ls, golden_ls = [], []
+# num_correct, num_total = 0, 0
+#
+# # for i in tqdm(range(len(test_dataset_no_prefix))):
+# for i in tqdm(range(10)):
+#     messages = test_dataset_with_prefix[i]["message"]
+#
+#     input_ids = tokenizer.apply_chat_template(
+#         messages,
+#         add_generation_prompt=True,
+#         enable_thinking=False,
+#         return_tensors="pt",
+#     ).to(model.device)
+#
+#     outputs = model.generate(
+#         input_ids,
+#         max_new_tokens=128,
+#         # eos_token_id=terminators,
+#         do_sample=False,
+#         # temperature=0.6,
+#         # top_p=0,
+#         pad_token_id=tokenizer.eos_token_id,
+#         # past_key_value=None
+#     )
+#
+#     response = outputs[0][input_ids.shape[-1]:]
+#     response = tokenizer.decode(response, skip_special_tokens=False)
+#     print(response)
+#     pred = parse_value_from_xml_with_regex(response, "answer")
+#
+#     pred_ls.append(pred)
+#     golden_ls.append(test_dataset_no_prefix[i]["sem_label"])
+#
+#     if pred == test_dataset_no_prefix[i]["sem_label"]:
+#         num_correct += 1
+#     num_total += 1
+#
+# accuracy = num_correct / num_total
+# print(f"Accuracy: {accuracy}")
+#
+# # print(response)
 
 
 
