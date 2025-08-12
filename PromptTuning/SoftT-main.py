@@ -317,7 +317,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--epochs", type=int, default=5)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--exp_name", type=str, default="Llama-3.1-8B-100-domain")
-    parser.add_argument("--output_dir", type=str, default="/ix1/xli/zhc195/SoftPrompt_Tuning/")
+    parser.add_argument("--output_dir", type=str, default="/ix1/xli/zhc195/SoftPrompt_Tuning/outputs/")
 
     # 精度 & 训练细节
     parser.add_argument("--fp16", action="store_true", default=False)
