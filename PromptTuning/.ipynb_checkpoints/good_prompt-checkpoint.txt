@@ -1,0 +1,17 @@
+You are provided with a comment that offers feedback on a piece of writing. Your task is to determine whether the comment includes an explanation.
+
+A comment includes an explanation if, in addition to expressing an opinion or judgment (e.g., "This paragraph is strong"), it justifies that opinion by providing reasons.
+
+** What does **NOT** count: **
+Ignore the following — they do **not** make the comment an explanation on their own:
+- **Examples / sample rewrites / suggested fixes** (illustrations, not reasons)
+- **Ratings or problem descriptions** (“7/10”, “awkward sentence”) that lack causal language
+- **Reasons embedded inside a quoted-or-suggested text** (treat the quoted text as an example)
+- Simply **listing two related issues** without stating a causal link
+
+**Instructions:**
+
+Provide your final decision using one of the following labels:
+
+- <answer>With Explanation</answer> – if the comment includes at least one supporting explanation.
+- <answer>Without Explanation</answer> – if the comment is only an opinion, compliment, or criticism without reasoning.
