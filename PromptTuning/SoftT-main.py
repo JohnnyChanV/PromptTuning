@@ -326,7 +326,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch_size", type=int, default=4)
     parser.add_argument("--warmup_ratio", type=float, default=0.1)
     parser.add_argument("--weight_decay", type=float, default=0.01)
-    parser.add_argument("--epochs", type=int, default=3)
+    parser.add_argument("--epochs", type=int, default=2)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--exp_name", type=str, default="Llama-3.2-3B-100-domain")
     parser.add_argument("--output_dir", type=str, default="/ix1/xli/zhc195/SoftPrompt_Tuning/outputs/")
@@ -335,7 +335,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--fp16", action="store_true", default=False)
     parser.add_argument("--bf16", action="store_true", default=True)
     parser.add_argument("--gradient_checkpointing", action="store_true", default=False)
-    parser.add_argument("--save_strategy", type=str, default="steps", choices=["no", "epoch", "steps"])
+    parser.add_argument("--save_strategy", type=str, default="epoch", choices=["no", "epoch", "steps"])
     parser.add_argument("--save_steps", type=int, default=75)
 
     # 评估（可选）
