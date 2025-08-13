@@ -126,7 +126,9 @@ def prepare_train_data(
         max_category = max(cnt.values())
         resample_set = []
         for each in cnt.keys():
-            resample_set += random.choices([item for item in data if item['Dimension.Name'] == each],k=max_category - cnt[each])
+            for _ in range(max_category - cnt[each]):
+                candidates = [item for item in data if item['Dimension.Name'] == each]
+                resample_set += random.choices(candidates, k=1)
         data += resample_set
 
 
@@ -345,8 +347,10 @@ def parse_args() -> argparse.Namespace:
 
 
 if __name__ == "__main__":
+
     args = parse_args()
     print(f"[Config] {args}")
+    random.seed(args.seed)
 
     # 1) 加载模型与分词器
     model, tokenizer = prepare_model_and_tokenizer(args.model_name)
