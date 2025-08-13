@@ -2,35 +2,36 @@
 
 
 python SoftT-main.py \
-  --exp_name "Llama-3.2-3B-100-Organization"\
-  --train_dimension_filter "['Organization']" \
+  --exp_name "Llama-3.2-3B-100-exclude-Organization"\
+  --train_dimension_filter "['Explanations', 'Textual.Evidence', 'Rhetorical.Strategies', 'nan', 'Argument', 'Thesis', 'Language']" \
 
 
 python SoftT-main.py \
-  --exp_name "Llama-3.2-3B-100-Explanations"\
-  --train_dimension_filter "['Explanations']" \
+  --exp_name "Llama-3.2-3B-100-exclude-Explanations"\
+  --train_dimension_filter "['Organization', 'Textual.Evidence', 'Rhetorical.Strategies', 'nan', 'Argument', 'Thesis', 'Language']" \
 
 
 python SoftT-main.py \
-  --exp_name "Llama-3.2-3B-100-TE"\
-  --train_dimension_filter "['Textual.Evidence']" \
+  --exp_name "Llama-3.2-3B-100-exclude-TE"\
+  --train_dimension_filter "['Organization', 'Explanations', 'Rhetorical.Strategies', 'nan', 'Argument', 'Thesis', 'Language']" \
 
 
 python SoftT-main.py \
-  --exp_name "Llama-3.2-3B-100-RS"\
-  --train_dimension_filter "['Rhetorical.Strategies']" \
+  --exp_name "Llama-3.2-3B-100-exclude-RS"\
+  --train_dimension_filter "['Organization', 'Explanations', 'Textual.Evidence', 'nan', 'Argument', 'Thesis', 'Language']" \
 
 
 python SoftT-main.py \
-  --exp_name "Llama-3.2-3B-100-Argument"\
-  --train_dimension_filter "['Argument']" \
+  --exp_name "Llama-3.2-3B-100-exclude-Argument"\
+  --train_dimension_filter "['Organization', 'Explanations', 'Textual.Evidence', 'nan', 'Thesis', 'Language']" \
 
 
 python SoftT-main.py \
-  --exp_name "Llama-3.2-3B-100-Thesis"\
-  --train_dimension_filter "['Thesis']" \
+  --exp_name "Llama-3.2-3B-100-exclude-Thesis"\
+  --train_dimension_filter "['Organization', 'Explanations', 'Textual.Evidence', 'nan', 'Argument', 'Language']" \
 
 
 python SoftT-main.py \
-  --exp_name "Llama-3.2-3B-100-Language"\
-  --train_dimension_filter "['Language']" \
+  --exp_name "Llama-3.2-3B-100-exclude-Language"\
+  --train_dimension_filter "['Organization', 'Explanations', 'Textual.Evidence', 'nan', 'Argument', 'Thesis']" \
+
