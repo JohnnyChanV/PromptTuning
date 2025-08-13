@@ -127,8 +127,8 @@ def prepare_train_data(
         resample_set = []
         for each in cnt.keys():
             for _ in range(max_category - cnt[each]):
-                candidates = [item for item in data if item['Dimension.Name'] == each]
-                resample_set += random.choices(candidates, k=1)
+                candidates = [item for item in data if item['sem_label'] == each]
+                resample_set += random.choice(candidates)
         data += resample_set
 
 
