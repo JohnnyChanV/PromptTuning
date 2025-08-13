@@ -13,7 +13,7 @@ import re
 from collections import Counter
 from functools import partial
 from typing import List, Tuple, Dict, Any, Optional
-
+import random
 import torch
 import pandas as pd  # 仅保留以兼容原始依赖（未直接使用）
 from datasets import Dataset
@@ -119,8 +119,18 @@ def prepare_train_data(
     if args.train_dimension_filter != None:
         new_data = [item for item in data if item['Dimension.Name'] in eval(args.train_dimension_filter)]
         data = new_data
+
     cnt = Counter([item["sem_label"] for item in data])
-    print(f"[Info] label distribution (top 10): {cnt.most_common(10)}")
+
+    if args.resample_train:
+        max_category = max(cnt.values())
+        resample_set = []
+        for each in cnt.keys():
+            resample_set += random.choices([item for item in data if item['Dimension.Name'] == each],k=max_category - cnt[each])
+        data += resample_set
+
+
+    print(f"[Info] label distribution (top 10): {Counter([item['sem_label'] for item in data])}")
     return data[:100]
 
 
@@ -300,6 +310,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--train_data", type=str, default="../RAG_data/proc_dev_data.json")
     parser.add_argument("--train_dimension_filter", type=str, default=None)
     # choices = ['Organization', 'Explanations', 'Textual.Evidence', 'Rhetorical.Strategies', 'nan', 'Argument', 'Thesis', 'Language']
+    parser.add_argument("--resample_train", action="store_true", default=True)
     parser.add_argument("--system_prompt_file", type=str, default="good_prompt.txt")
     parser.add_argument("--prompt_template", type=str, default=DEFAULT_PROMPT_TEMPLATE)
 
@@ -323,8 +334,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--fp16", action="store_true", default=False)
     parser.add_argument("--bf16", action="store_true", default=True)
     parser.add_argument("--gradient_checkpointing", action="store_true", default=False)
-    parser.add_argument("--save_strategy", type=str, default="epoch", choices=["no", "epoch", "steps"])
-    parser.add_argument("--save_steps", type=int, default=250)
+    parser.add_argument("--save_strategy", type=str, default="no", choices=["no", "epoch", "steps"])
+    parser.add_argument("--save_steps", type=int, default=100)
 
     # 评估（可选）
     parser.add_argument("--eval_sample_n", type=int, default=0,
