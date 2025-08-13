@@ -335,7 +335,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--bf16", action="store_true", default=True)
     parser.add_argument("--gradient_checkpointing", action="store_true", default=False)
     parser.add_argument("--save_strategy", type=str, default="steps", choices=["no", "epoch", "steps"])
-    parser.add_argument("--save_steps", type=int, default=125)
+    parser.add_argument("--save_steps", type=int, default=75)
 
     # 评估（可选）
     parser.add_argument("--eval_sample_n", type=int, default=0,
