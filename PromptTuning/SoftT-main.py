@@ -306,7 +306,7 @@ def parse_args() -> argparse.Namespace:
     )
 
     # 模型 & 数据
-    parser.add_argument("--model_name", type=str, default="meta-llama/Llama-3.1-8B-Instruct")
+    parser.add_argument("--model_name", type=str, default="meta-llama/Llama-3.2-3B-Instruct")
     parser.add_argument("--train_data", type=str, default="../RAG_data/proc_dev_data.json")
     parser.add_argument("--train_dimension_filter", type=str, default=None)
     parser.add_argument("--train_size", type=int, default=5000)
