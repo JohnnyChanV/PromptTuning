@@ -126,9 +126,7 @@ def prepare_train_data(
         max_category = max(cnt.values())
         resample_set = []
         for each in cnt.keys():
-            for _ in range(max_category - cnt[each]):
-                candidates = [item for item in data if item['sem_label'] == each]
-                resample_set += random.choice(candidates)
+            resample_set += random.choices([item for item in data if item['sem_label'] == each],k=max_category - cnt[each])
         data += resample_set
 
 
