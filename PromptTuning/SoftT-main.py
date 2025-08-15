@@ -131,7 +131,7 @@ def prepare_train_data(
 
 
     print(f"[Info] label distribution (top 10): {Counter([item['sem_label'] for item in data])}")
-    return data[:args.train_size]
+    return data[:args.train_size*len(eval(args.train_dimension_filter))]
 
 
 def dataset_with_messages(
