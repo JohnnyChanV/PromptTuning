@@ -1,5 +1,6 @@
 #!/bin/bash
 
+git pull
 
 python SoftT-main.py \
   --exp_name "Llama-3.2-3B-E.T.R"\
