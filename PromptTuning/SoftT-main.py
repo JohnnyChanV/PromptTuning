@@ -311,7 +311,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--train_dimension_filter", type=str, default=None)
     parser.add_argument("--train_size", type=int, default=200)
     # choices = ['Organization', 'Explanations', 'Textual.Evidence', 'Rhetorical.Strategies', 'nan', 'Argument', 'Thesis', 'Language']
-    parser.add_argument("--resample_train", action="store_true", default=True)
+    parser.add_argument("--resample_train", action="store_true", default=False)
     parser.add_argument("--system_prompt_file", type=str, default="good_prompt.txt")
     parser.add_argument("--prompt_template", type=str, default=DEFAULT_PROMPT_TEMPLATE)
 
