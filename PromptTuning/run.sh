@@ -8,10 +8,10 @@ python SoftT-main.py \
   --resample_train
 
 
-python SoftT-main.py \
-  --exp_name "Llama-3.2-3B-A.T"\
-  --train_dimension_filter "['nan', 'Argument', 'Thesis']" \
-  --resample_train
+#python SoftT-main.py \
+#  --exp_name "Llama-3.2-3B-A.T"\
+#  --train_dimension_filter "['nan', 'Argument', 'Thesis']" \
+#  --resample_train
 
 
 python SoftT-main.py \

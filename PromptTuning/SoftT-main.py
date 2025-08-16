@@ -95,7 +95,7 @@ def build_prefix_tokens(
         prefix_token_strs = [f"<|reserved_special_token_{i}|>" for i in range(num_prefix_tokens)]
         prefix_token_ids = tokenizer.convert_tokens_to_ids(prefix_token_strs)
     else:
-        prefix_token_strs = [f"<softP_{i}>" for i in range(num_prefix_tokens)]
+        prefix_token_strs = [f"<|reserved_special_token_{i}|>" for i in range(num_prefix_tokens)]
         num_added = tokenizer.add_tokens(prefix_token_strs)
         # 如果新增了 token，需要扩展 embedding
         if num_added > 0:
@@ -343,8 +343,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--fp16", action="store_true", default=False)
     parser.add_argument("--bf16", action="store_true", default=True)
     parser.add_argument("--gradient_checkpointing", action="store_true", default=False)
-    parser.add_argument("--save_strategy", type=str, default="epoch", choices=["no", "epoch", "steps"])
-    parser.add_argument("--save_steps", type=int, default=75)
+    parser.add_argument("--save_strategy", type=str, default="steps", choices=["no", "epoch", "steps"])
+    parser.add_argument("--save_steps", type=int, default=600)
 
     # 评估（可选）
     parser.add_argument("--eval_sample_n", type=int, default=0,
