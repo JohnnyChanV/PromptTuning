@@ -130,7 +130,7 @@ def prepare_train_data(
         data += resample_set
 
 
-    print(f"[Info] label distribution (top 10): {Counter([item['sem_label'] for item in data])}")
+    print(f"[Info] label distribution (top 10): {cnt}")
 
     if len(eval(args.train_dimension_filter))!=0:
         times = len(eval(args.train_dimension_filter))
@@ -377,6 +377,7 @@ if __name__ == "__main__":
 
     # 4) 准备训练数据与数据集
     train_data = prepare_train_data(args.train_data, SEMANTIC_LABEL)
+    print(len(train_data))
     train_dataset = dataset_with_messages(
         train_data,
         tokenizer=tokenizer,
