@@ -132,7 +132,11 @@ def prepare_train_data(
 
     print(f"[Info] label distribution (top 10): {Counter([item['sem_label'] for item in data])}")
 
-    times = len(eval(args.train_dimension_filter)) if  len(eval(args.train_dimension_filter))!=0 else 1
+    if len(eval(args.train_dimension_filter))!=0:
+        times = len(eval(args.train_dimension_filter))
+    else:
+        times = 1
+
     print(f"[Info] Training set right bound: {args.train_size*times}")
     return data[:args.train_size*times]
 
