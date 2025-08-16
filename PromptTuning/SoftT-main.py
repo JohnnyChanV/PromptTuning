@@ -131,7 +131,9 @@ def prepare_train_data(
 
 
     print(f"[Info] label distribution (top 10): {Counter([item['sem_label'] for item in data])}")
-    return data[:args.train_size*len(eval(args.train_dimension_filter))]
+
+    times = len(eval(args.train_dimension_filter)) if  len(eval(args.train_dimension_filter))!=0 else 1
+    return data[:args.train_size*times]
 
 
 def dataset_with_messages(
@@ -308,7 +310,7 @@ def parse_args() -> argparse.Namespace:
     # 模型 & 数据
     parser.add_argument("--model_name", type=str, default="meta-llama/Llama-3.2-3B-Instruct")
     parser.add_argument("--train_data", type=str, default="../RAG_data/proc_dev_data.json")
-    parser.add_argument("--train_dimension_filter", type=str, default=None)
+    parser.add_argument("--train_dimension_filter", type=str, default="[]")
     parser.add_argument("--train_size", type=int, default=200)
     # choices = ['Organization', 'Explanations', 'Textual.Evidence', 'Rhetorical.Strategies', 'nan', 'Argument', 'Thesis', 'Language']
     parser.add_argument("--resample_train", action="store_true", default=False)
