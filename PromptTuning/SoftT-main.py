@@ -111,7 +111,7 @@ def prepare_train_data(
     semantic_label_map: Dict[int, str],
 ) -> List[Dict[str, Any]]:
     data = load_json(path)
-    print(data[:5])
+    print(len(data))
     for item in data:
         # 兼容原始字段
         item["sem_label"] = semantic_label_map[item["label"]]
@@ -378,7 +378,6 @@ if __name__ == "__main__":
 
     # 4) 准备训练数据与数据集
     train_data = prepare_train_data(args.train_data, SEMANTIC_LABEL)
-    print(len(train_data))
     train_dataset = dataset_with_messages(
         train_data,
         tokenizer=tokenizer,
