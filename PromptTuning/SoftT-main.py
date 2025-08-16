@@ -119,6 +119,7 @@ def prepare_train_data(
     if len(args.train_dimension_filter) > 0:
         new_data = [item for item in data if item['Dimension.Name'] in eval(args.train_dimension_filter)]
         data = new_data
+    print(len(data))
 
     cnt = Counter([item["sem_label"] for item in data])
 
