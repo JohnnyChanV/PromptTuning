@@ -161,7 +161,7 @@ def dataset_with_messages(
     """
     def _with_answer(row: Dict[str, Any]) -> Dict[str, Any]:
         msgs = [
-            {"role": "user", "content": system_prompt},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt_template.format(row["input"])},
             {"role": "assistant", "content": "<answer>" + row["sem_label"] + "</answer>"},
         ]
@@ -174,7 +174,7 @@ def dataset_with_messages(
 
     def _no_answer(row: Dict[str, Any]) -> Dict[str, Any]:
         msgs = [
-            {"role": "user", "content": system_prompt},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt_template.format(row["input"])},
         ]
         return {
@@ -200,7 +200,7 @@ def freeze_all_but_prefix_embeddings(
     """
     # 冻结全部参数
     for p in model.parameters():
-        p.requires_grad = False
+        p.requires_grad = True
 
     # 只训练词嵌入（整张表先解冻，再用 hook 只放行特定行）
     emb = model.get_input_embeddings()
