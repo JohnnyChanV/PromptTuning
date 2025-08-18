@@ -161,7 +161,7 @@ def dataset_with_messages(
     """
     def _with_answer(row: Dict[str, Any]) -> Dict[str, Any]:
         msgs = [
-            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": system_prompt},
             {"role": "user", "content": prompt_template.format(row["input"])},
             {"role": "assistant", "content": "<answer>" + row["sem_label"] + "</answer>"},
         ]
@@ -174,7 +174,7 @@ def dataset_with_messages(
 
     def _no_answer(row: Dict[str, Any]) -> Dict[str, Any]:
         msgs = [
-            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": system_prompt},
             {"role": "user", "content": prompt_template.format(row["input"])},
         ]
         return {
