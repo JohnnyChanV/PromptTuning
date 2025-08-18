@@ -98,7 +98,7 @@ def build_prefix_tokens(
         prefix_token_strs = [f"<|reserved_special_token_{i}|>" for i in range(num_prefix_tokens)]
         num_added = tokenizer.add_tokens(prefix_token_strs)
         # 如果新增了 token，需要扩展 embedding
-        if num_added > 0 and model.get_input_embeddings().weight.shape[0] < len(tokenizer):
+        if num_added > 0:
             model.resize_token_embeddings(len(tokenizer))
             print("[Info]: Model EMBEDDING RESIZED")
         prefix_token_ids = tokenizer.convert_tokens_to_ids(prefix_token_strs)
@@ -106,7 +106,7 @@ def build_prefix_tokens(
             emb = model.get_input_embeddings().weight
             emb[prefix_token_ids] = torch.empty_like(emb[prefix_token_ids]).normal_(mean=0.0, std=0.02)
         print("Embedding Initialization Results:\n",model.get_input_embeddings().weight[prefix_token_ids])
-        print(f"Added {num_added} tokens: {prefix_token_ids[:10]}{'...' if len(prefix_token_ids) > 10 else ''}")
+        print(f"Added {num_added} tokens: {tokenizer(''.join(prefix_token_strs))}")
         print(f"[INFO] Model Embedding size: {model.get_input_embeddings().weight.shape[0]}. \n [INFO] Tokenizer vocab size: {len(tokenizer)}")
 
     return prefix_token_strs, prefix_token_ids, tokenizer, model
@@ -214,7 +214,7 @@ def freeze_all_but_prefix_embeddings(
     def grad_hook(grad: torch.Tensor) -> torch.Tensor:
         mask = torch.zeros_like(grad)
         mask[e2u] = 1.0
-        print(grad[e2u])
+        # print(grad[e2u])
         return grad * mask
 
     handle = emb.weight.register_hook(grad_hook)
@@ -381,7 +381,7 @@ if __name__ == "__main__":
     # 3) 读取 system prompt，并将 prefix 拼接到最前面
     prefix = "".join(prefix_token_strs[: args.num_prefix_tokens])
     system_prompt_raw = read_text(args.system_prompt_file)
-    system_prompt =  system_prompt_raw + prefix
+    system_prompt = prefix + "\n" + system_prompt_raw
     print(system_prompt)
 
     # 4) 准备训练数据与数据集
