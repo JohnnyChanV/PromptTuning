@@ -102,8 +102,10 @@ def build_prefix_tokens(
             model.resize_token_embeddings(len(tokenizer))
             print("[Info]: Model EMBEDDING RESIZED")
         prefix_token_ids = tokenizer.convert_tokens_to_ids(prefix_token_strs)
-        torch.nn.init.normal_(model.get_input_embeddings().weight[prefix_token_ids], mean=0.0, std=0.02)
-        print("Embedding Initialization",model.get_input_embeddings().weight[prefix_token_ids])
+        with torch.no_grad():
+            emb = model.get_input_embeddings().weight
+            emb[prefix_token_ids] = torch.empty_like(emb[prefix_token_ids]).normal_(mean=0.0, std=0.02)
+        print("Embedding Initialization Results:\n",model.get_input_embeddings().weight[prefix_token_ids])
         print(f"Added {num_added} tokens: {prefix_token_ids[:10]}{'...' if len(prefix_token_ids) > 10 else ''}")
         print(f"[INFO] Model Embedding size: {model.get_input_embeddings().weight.shape[0]}. \n [INFO] Tokenizer vocab size: {len(tokenizer)}")
 
