@@ -22,7 +22,7 @@ from transformers import (
     AutoTokenizer,
     TrainingArguments,
 )
-from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
+from trl import SFTTrainer, DataCollatorForCompletionOnlyLM, GRPOTrainer
 from tqdm import tqdm
 
 
@@ -164,6 +164,7 @@ def dataset_with_messages(
                 msgs, tokenize=False, add_generation_prompt=False, enable_thinking=False
             ),
             "message": msgs,
+            "sem_label": row["sem_label"]
         }
 
     def _no_answer(row: Dict[str, Any]) -> Dict[str, Any]:
@@ -173,9 +174,10 @@ def dataset_with_messages(
         ]
         return {
             "text": tokenizer.apply_chat_template(
-                msgs, tokenize=False, add_generation_prompt=False, enable_thinking=False
+                msgs, tokenize=False, add_generation_prompt=True, enable_thinking=True
             ),
             "message": msgs,
+            "sem_label": row["sem_label"]
         }
 
     ds = Dataset.from_list(data).shuffle(seed=seed)
@@ -346,6 +348,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--save_strategy", type=str, default="steps", choices=["no", "epoch", "steps"])
     parser.add_argument("--save_steps", type=int, default=600)
 
+    # vllm 配置
+    parser.add_argument("--use_vllm", action="store_true", default=False)
+    parser.add_argument("--vllm_server_host", type=str, default="")
+    parser.add_argument("--vllm_server_port", type=str, default="")
+    parser.add_argument("--connection_timeout", type=str, default="")
+    parser.add_argument("--max_completion_length", type=int, default=2048)
+
+
     # 评估（可选）
     parser.add_argument("--eval_sample_n", type=int, default=0,
                         help=">0 时，在训练后对若干条样本做简单评估")
@@ -375,7 +385,6 @@ if __name__ == "__main__":
     prefix = "".join(prefix_token_strs[: args.num_prefix_tokens])
     system_prompt_raw = read_text(args.system_prompt_file)
     system_prompt = prefix + system_prompt_raw
-    print(system_prompt)
 
     # 4) 准备训练数据与数据集
     train_data = prepare_train_data(args.train_data, SEMANTIC_LABEL)
@@ -384,7 +393,7 @@ if __name__ == "__main__":
         tokenizer=tokenizer,
         system_prompt=system_prompt,
         prompt_template=args.prompt_template,
-        add_answer=True,
+        add_answer=False,
         seed=args.seed,
     )
 

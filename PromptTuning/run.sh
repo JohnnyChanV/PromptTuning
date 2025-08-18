@@ -17,13 +17,14 @@ python SoftT-main.py \
 python SoftT-main.py \
   --exp_name "Llama-3.2-3B-O.L"\
   --train_dimension_filter "['nan','Organization', 'Language']" \
-  --resample_train
+  --resample_train \
 
 
 
 
-#python SoftT-main.py \
-#  --model_name "meta-llama/Llama-3.1-70B-Instruct"\
-#  --exp_name "Llama-3-70B-all"\
-#  --train_size 20000 \
-#  --gradient_checkpointing
+python SoftT-main.py \
+  --model_name "Qwen/Qwen2.5-7B-Instruct"\
+  --exp_name "Qwen2.5-7B-all"\
+  --train_size 20000 \
+  --gradient_checkpointing \
+  --force_strategy "add_tokens"
