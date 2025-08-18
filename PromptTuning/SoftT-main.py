@@ -206,10 +206,10 @@ def freeze_all_but_prefix_embeddings(
         print(f"[Info] Trainable embedding rows (prefix tokens): {e2u.tolist()[:20]}{'...' if len(e2u) > 20 else ''}")
 
     def grad_hook(grad: torch.Tensor) -> torch.Tensor:
-        print(grad)
+        print("梯度不为0数量：",sum(grad!=0))
         mask = torch.zeros_like(grad)
         mask[e2u] = 1.0
-        print(grad)
+        print("梯度不为0数量：",sum(grad!=0))
         return grad * mask
 
     handle = emb.weight.register_hook(grad_hook)
