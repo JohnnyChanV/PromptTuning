@@ -219,7 +219,7 @@ def build_data_collator(tokenizer: AutoTokenizer, model_name: str) -> DataCollat
     if "llama" in model_name.lower():
         response_template = "<|start_header_id|>assistant<|end_header_id|>"
     else:
-        response_template = "<|im_start|>assistant"
+        response_template = "<|im_start|>assistant\n"
     return DataCollatorForCompletionOnlyLM(response_template, tokenizer=tokenizer)
 
 
@@ -374,7 +374,7 @@ if __name__ == "__main__":
     # 3) 读取 system prompt，并将 prefix 拼接到最前面
     prefix = "".join(prefix_token_strs[: args.num_prefix_tokens])
     system_prompt_raw = read_text(args.system_prompt_file)
-    system_prompt = prefix + system_prompt_raw
+    system_prompt = prefix + "\n" + system_prompt_raw
     print(system_prompt)
 
     # 4) 准备训练数据与数据集
