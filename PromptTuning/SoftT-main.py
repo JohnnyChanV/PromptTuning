@@ -413,17 +413,17 @@ if __name__ == "__main__":
     print("出现的前缀 id:", set(prefix_token_ids) & ids_in_batch)
 
 
-    # 7) 训练
-    trainer.train()
-
-    # 8) 清理 hook
-    hook_handle.remove()
-    model.eval()
-
-    # 9) 可选：快速评估若干条样本（用训练数据的 message 演示）
-    if args.eval_sample_n and args.eval_sample_n > 0:
-        messages_list = [ex["message"] for ex in train_dataset.select(range(min(args.eval_sample_n, len(train_dataset))))]
-        gold_labels = [ex["sem_label"] for ex in train_data[: len(messages_list)]]
-        run_eval_sample(model, tokenizer, messages_list, gold_labels, sample_n=args.eval_sample_n)
-
-    print("[Done] Training finished.")
+    # # 7) 训练
+    # trainer.train()
+    #
+    # # 8) 清理 hook
+    # hook_handle.remove()
+    # model.eval()
+    #
+    # # 9) 可选：快速评估若干条样本（用训练数据的 message 演示）
+    # if args.eval_sample_n and args.eval_sample_n > 0:
+    #     messages_list = [ex["message"] for ex in train_dataset.select(range(min(args.eval_sample_n, len(train_dataset))))]
+    #     gold_labels = [ex["sem_label"] for ex in train_data[: len(messages_list)]]
+    #     run_eval_sample(model, tokenizer, messages_list, gold_labels, sample_n=args.eval_sample_n)
+    #
+    # print("[Done] Training finished.")
