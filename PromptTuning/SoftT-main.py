@@ -98,10 +98,9 @@ def build_prefix_tokens(
         prefix_token_strs = [f"<|reserved_special_token_{i}|>" for i in range(num_prefix_tokens)]
         num_added = tokenizer.add_tokens(prefix_token_strs)
         # 如果新增了 token，需要扩展 embedding
-        if num_added > 0:
-            print(model.get_input_embeddings().weight.shape)
+        if num_added > 0 and model.get_input_embeddings().weight.shape[0] < len(tokenizer):
             model.resize_token_embeddings(len(tokenizer))
-            print(model.get_input_embeddings().weight.shape)
+            print("[Info]: Model EMBEDDING RESIZED")
         prefix_token_ids = tokenizer.convert_tokens_to_ids(prefix_token_strs)
         print(f"Added {num_added} tokens: {prefix_token_ids[:10]}{'...' if len(prefix_token_ids) > 10 else ''}")
 
