@@ -206,8 +206,10 @@ def freeze_all_but_prefix_embeddings(
         print(f"[Info] Trainable embedding rows (prefix tokens): {e2u.tolist()[:20]}{'...' if len(e2u) > 20 else ''}")
 
     def grad_hook(grad: torch.Tensor) -> torch.Tensor:
+        print(grad)
         mask = torch.zeros_like(grad)
         mask[e2u] = 1.0
+        print(grad)
         return grad * mask
 
     handle = emb.weight.register_hook(grad_hook)
@@ -395,35 +397,17 @@ if __name__ == "__main__":
     collator = build_data_collator(tokenizer, args.model_name)
     trainer = build_trainer(model, train_dataset, collator, args)
 
-    # 1) 这些“前缀 token”是否真的是“单一 token”？
-    print(tokenizer(prefix))
+    # 7) 训练
+    trainer.train()
 
-    print("unk id =", tokenizer.unk_token_id)
+    # 8) 清理 hook
+    hook_handle.remove()
+    model.eval()
 
-    # 2) 词表里到底加了几个？（Qwen 上常见是 0）
-    # 你代码里已经打印了 num_added，但再显式断言一下更稳
-    num_added = tokenizer.add_special_tokens({})  # 不会改变，只是为了取当前状态
-    # ^ 这行只是占位，保持原样就好。真正的 num_added 在你 build_prefix_tokens 里。
-    assert all(i is not None and i != tokenizer.unk_token_id and i >= 0 for i in prefix_token_ids), \
-        f"prefix ids 异常：{prefix_token_ids[:10]}..."
+    # 9) 可选：快速评估若干条样本（用训练数据的 message 演示）
+    if args.eval_sample_n and args.eval_sample_n > 0:
+        messages_list = [ex["message"] for ex in train_dataset.select(range(min(args.eval_sample_n, len(train_dataset))))]
+        gold_labels = [ex["sem_label"] for ex in train_data[: len(messages_list)]]
+        run_eval_sample(model, tokenizer, messages_list, gold_labels, sample_n=args.eval_sample_n)
 
-    # 3) 这些 id 是否真的出现在一条样本的 input_ids 里？
-    enc = tokenizer(train_dataset[0]["text"], return_tensors="pt")
-    ids_in_batch = set(enc["input_ids"][0].tolist())
-    print("出现的前缀 id:", set(prefix_token_ids) & ids_in_batch)
-
-
-    # # 7) 训练
-    # trainer.train()
-    #
-    # # 8) 清理 hook
-    # hook_handle.remove()
-    # model.eval()
-    #
-    # # 9) 可选：快速评估若干条样本（用训练数据的 message 演示）
-    # if args.eval_sample_n and args.eval_sample_n > 0:
-    #     messages_list = [ex["message"] for ex in train_dataset.select(range(min(args.eval_sample_n, len(train_dataset))))]
-    #     gold_labels = [ex["sem_label"] for ex in train_data[: len(messages_list)]]
-    #     run_eval_sample(model, tokenizer, messages_list, gold_labels, sample_n=args.eval_sample_n)
-    #
-    # print("[Done] Training finished.")
+    print("[Done] Training finished.")
