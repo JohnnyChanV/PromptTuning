@@ -256,12 +256,18 @@ def build_trainer(
         save_strategy=args.save_strategy,
         save_steps=args.save_steps,
     )
+    optimizer = torch.optim.AdamW(
+        model.get_input_embeddings().weight,
+        lr=args.learning_rate,  # 注意别和 targs.learning_rate 冲突
+        weight_decay=args.weight_decay
+    )
     trainer = SFTTrainer(
         model=model,
         train_dataset=train_dataset,
         args=targs,
         data_collator=data_collator,
-        processing_class=tokenizer
+        processing_class=tokenizer,
+        optimizers=(optimizer, None)   # ← 只传 optimizer，scheduler 让 Trainer 自己建
     )
     return trainer
 
