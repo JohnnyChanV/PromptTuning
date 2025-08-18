@@ -396,8 +396,7 @@ if __name__ == "__main__":
     trainer = build_trainer(model, train_dataset, collator, args)
 
     # 1) 这些“前缀 token”是否真的是“单一 token”？
-    for t in prefix_token_strs[:5]:
-        print(t, tokenizer.tokenize(t), tokenizer.convert_tokens_to_ids(t))
+    print(tokenizer(prefix))
 
     print("unk id =", tokenizer.unk_token_id)
 
