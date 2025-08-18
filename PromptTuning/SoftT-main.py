@@ -210,7 +210,7 @@ def freeze_all_but_prefix_embeddings(
         print("梯度不为0数量：",(grad.abs().sum(-1) != 0).sum().item())
         mask = torch.zeros_like(grad)
         mask[e2u] = 1.0
-        print("梯度不为0数量：",(grad.abs().sum(-1) != 0).sum().item())
+        print("梯度不为0数量：",((grad * mask).abs().sum(-1) != 0).sum().item())
         return grad * mask
 
     handle = emb.weight.register_hook(grad_hook)
