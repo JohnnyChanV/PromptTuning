@@ -382,7 +382,7 @@ if __name__ == "__main__":
     prefix = "".join(prefix_token_strs[: args.num_prefix_tokens])
     system_prompt_raw = read_text(args.system_prompt_file)
     system_prompt = prefix + "\n" + system_prompt_raw
-    print(system_prompt)
+    print(f"[Check] Prefix Tokenized: {tokenizer(prefix).input_ids}")
 
     # 4) 准备训练数据与数据集
     train_data = prepare_train_data(args.train_data, SEMANTIC_LABEL)
