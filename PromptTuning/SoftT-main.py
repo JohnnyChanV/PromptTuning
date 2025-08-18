@@ -98,7 +98,7 @@ def build_prefix_tokens(
         prefix_token_strs = [f"<|reserved_special_token_{i}|>" for i in range(num_prefix_tokens)]
         num_added = tokenizer.add_tokens(prefix_token_strs)
         # 如果新增了 token，需要扩展 embedding
-        if num_added > 0:
+        if num_added > 0 and model.get_input_embeddings().weight.shape[0] < len(tokenizer):
             model.resize_token_embeddings(len(tokenizer))
             print("[Info]: Model EMBEDDING RESIZED")
         prefix_token_ids = tokenizer.convert_tokens_to_ids(prefix_token_strs)
@@ -106,7 +106,7 @@ def build_prefix_tokens(
             emb = model.get_input_embeddings().weight
             emb[prefix_token_ids] = torch.empty_like(emb[prefix_token_ids]).normal_(mean=0.0, std=0.02)
         print("Embedding Initialization Results:\n",model.get_input_embeddings().weight[prefix_token_ids])
-        print(f"Added {num_added} tokens: {tokenizer(''.join(prefix_token_strs))}")
+        print(f"Added {num_added} tokens: {prefix_token_ids[:10]}{'...' if len(prefix_token_ids) > 10 else ''}")
         print(f"[INFO] Model Embedding size: {model.get_input_embeddings().weight.shape[0]}. \n [INFO] Tokenizer vocab size: {len(tokenizer)}")
 
     return prefix_token_strs, prefix_token_ids, tokenizer, model
@@ -200,7 +200,7 @@ def freeze_all_but_prefix_embeddings(
     """
     # 冻结全部参数
     for p in model.parameters():
-        p.requires_grad = True
+        p.requires_grad = False
 
     # 只训练词嵌入（整张表先解冻，再用 hook 只放行特定行）
     emb = model.get_input_embeddings()
@@ -214,7 +214,7 @@ def freeze_all_but_prefix_embeddings(
     def grad_hook(grad: torch.Tensor) -> torch.Tensor:
         mask = torch.zeros_like(grad)
         mask[e2u] = 1.0
-        print(grad[e2u])
+        # print(grad[e2u])
         return grad * mask
 
     handle = emb.weight.register_hook(grad_hook)
@@ -382,6 +382,7 @@ if __name__ == "__main__":
     prefix = "".join(prefix_token_strs[: args.num_prefix_tokens])
     system_prompt_raw = read_text(args.system_prompt_file)
     system_prompt = prefix + "\n" + system_prompt_raw
+    print(system_prompt)
 
     # 4) 准备训练数据与数据集
     train_data = prepare_train_data(args.train_data, SEMANTIC_LABEL)
@@ -393,13 +394,13 @@ if __name__ == "__main__":
         add_answer=True,
         seed=args.seed,
     )
+    print(train_dataset[0])
 
     # 5) 冻结参数，仅训练 prefix 对应的 embedding 行（通过 grad hook 局部放行）
     hook_handle = freeze_all_but_prefix_embeddings(model, prefix_token_ids, verbose=True)
 
     # 6) collator & trainer
     collator = build_data_collator(tokenizer, args.model_name)
-    print(f"[Check] Prefix Tokenized: {collator.tokenizer.tokenize(prefix)}")
     trainer = build_trainer(model, train_dataset, collator, args)
 
     # 7) 训练
