@@ -225,9 +225,10 @@ def build_data_collator(tokenizer: AutoTokenizer, model_name: str) -> DataCollat
     # 仅在 assistant 段回传梯度
     if "llama" in model_name.lower():
         response_template = "<|start_header_id|>assistant<|end_header_id|>"
-    else:
+    elif "qwen2" in model_name.lower():
         response_template = "<|im_start|>assistant\n"
-
+    elif "qwen3" in model_name.lower():
+        response_template = "</think>"
     collator = DataCollatorForCompletionOnlyLM(response_template,tokenizer=tokenizer)
     return collator
 
