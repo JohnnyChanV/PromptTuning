@@ -402,7 +402,7 @@ if __name__ == "__main__":
     # 6) collator & trainer
     collator = build_data_collator(tokenizer, args.model_name)
     trainer = build_trainer(model, train_dataset, collator, args)
-    for i,item in trainer.get_train_dataloader():
+    for i,item in enumerate(trainer.get_train_dataloader()):
         print(i,item)
         exit()
 
