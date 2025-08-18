@@ -403,7 +403,7 @@ if __name__ == "__main__":
     hook_handle = freeze_all_but_prefix_embeddings(model, prefix_token_ids, verbose=True)
 
     # 6) collator & trainer
-    tokenizer.save_pretrained(args.output_dir + args.exp_name + 'tokenizer')
+    tokenizer.save_pretrained(args.output_dir + args.exp_name + '/tokenizer')
     collator = build_data_collator(tokenizer, args.model_name)
     trainer = build_trainer(model, train_dataset, collator, args)
 
