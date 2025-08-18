@@ -214,7 +214,7 @@ def freeze_all_but_prefix_embeddings(
     def grad_hook(grad: torch.Tensor) -> torch.Tensor:
         mask = torch.zeros_like(grad)
         mask[e2u] = 1.0
-        # print(grad[e2u])
+        print(grad[e2u])
         return grad * mask
 
     handle = emb.weight.register_hook(grad_hook)
