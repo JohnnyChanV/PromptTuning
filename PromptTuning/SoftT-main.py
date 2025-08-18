@@ -227,7 +227,10 @@ def build_data_collator(tokenizer: AutoTokenizer, model_name: str) -> DataCollat
         response_template = "<|start_header_id|>assistant<|end_header_id|>"
     else:
         response_template = "<|im_start|>assistant\n"
-    return DataCollatorForCompletionOnlyLM(response_template, tokenizer=tokenizer)
+
+    collator = DataCollatorForCompletionOnlyLM(response_template)
+    collator.tokenizer = tokenizer
+    return collator
 
 
 def build_trainer(
@@ -402,9 +405,9 @@ if __name__ == "__main__":
     # 6) collator & trainer
     collator = build_data_collator(tokenizer, args.model_name)
     trainer = build_trainer(model, train_dataset, collator, args)
-    for i,item in enumerate(trainer.get_train_dataloader()):
-        print(i,item['input_ids'][0])
-        exit()
+    # for i,item in enumerate(trainer.get_train_dataloader()):
+    #     print(i,item['input_ids'][0])
+    #     exit()
 
     # 7) 训练
     trainer.train()
