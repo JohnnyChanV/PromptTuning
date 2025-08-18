@@ -395,6 +395,25 @@ if __name__ == "__main__":
     collator = build_data_collator(tokenizer, args.model_name)
     trainer = build_trainer(model, train_dataset, collator, args)
 
+    # 1) 这些“前缀 token”是否真的是“单一 token”？
+    for t in prefix_token_strs[:5]:
+        print(t, tokenizer.tokenize(t), tokenizer.convert_tokens_to_ids(t))
+
+    print("unk id =", tokenizer.unk_token_id)
+
+    # 2) 词表里到底加了几个？（Qwen 上常见是 0）
+    # 你代码里已经打印了 num_added，但再显式断言一下更稳
+    num_added = tokenizer.add_special_tokens({})  # 不会改变，只是为了取当前状态
+    # ^ 这行只是占位，保持原样就好。真正的 num_added 在你 build_prefix_tokens 里。
+    assert all(i is not None and i != tokenizer.unk_token_id and i >= 0 for i in prefix_token_ids), \
+        f"prefix ids 异常：{prefix_token_ids[:10]}..."
+
+    # 3) 这些 id 是否真的出现在一条样本的 input_ids 里？
+    enc = tokenizer(train_dataset[0]["text"], return_tensors="pt")
+    ids_in_batch = set(enc["input_ids"][0].tolist())
+    print("出现的前缀 id:", set(prefix_token_ids) & ids_in_batch)
+
+
     # 7) 训练
     trainer.train()
 
