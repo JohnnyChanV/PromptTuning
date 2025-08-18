@@ -403,7 +403,7 @@ if __name__ == "__main__":
     collator = build_data_collator(tokenizer, args.model_name)
     trainer = build_trainer(model, train_dataset, collator, args)
     for i,item in enumerate(trainer.get_train_dataloader()):
-        print(i,item)
+        print(i,item['input_ids'][0])
         exit()
 
     # 7) 训练
