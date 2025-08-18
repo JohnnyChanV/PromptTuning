@@ -103,6 +103,7 @@ def build_prefix_tokens(
             print("[Info]: Model EMBEDDING RESIZED")
         prefix_token_ids = tokenizer.convert_tokens_to_ids(prefix_token_strs)
         print(f"Added {num_added} tokens: {prefix_token_ids[:10]}{'...' if len(prefix_token_ids) > 10 else ''}")
+        print(f"[INFO] Model Embedding size: {model.get_input_embeddings().weight.shape[0]}. \n [INFO] Tokenizer vocab size: {len(tokenizer)}")
 
     return prefix_token_strs, prefix_token_ids, tokenizer, model
 
