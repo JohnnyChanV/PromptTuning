@@ -228,7 +228,7 @@ def build_data_collator(tokenizer: AutoTokenizer, model_name: str) -> DataCollat
     else:
         response_template = "<|im_start|>assistant\n"
 
-    collator = DataCollatorForCompletionOnlyLM(response_template)
+    collator = DataCollatorForCompletionOnlyLM(response_template,tokenizer=tokenizer)
     collator.tokenizer = tokenizer
     return collator
 
