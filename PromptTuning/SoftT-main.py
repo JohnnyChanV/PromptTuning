@@ -381,7 +381,7 @@ if __name__ == "__main__":
     # 3) 读取 system prompt，并将 prefix 拼接到最前面
     prefix = "".join(prefix_token_strs[: args.num_prefix_tokens])
     system_prompt_raw = read_text(args.system_prompt_file)
-    system_prompt = prefix + "\n" + system_prompt_raw
+    system_prompt =  system_prompt_raw + prefix
     print(system_prompt)
 
     # 4) 准备训练数据与数据集
