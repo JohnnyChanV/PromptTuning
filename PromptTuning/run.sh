@@ -3,27 +3,38 @@
 git pull
 
 python SoftT-main.py \
-  --exp_name "Llama-3.2-3B-E.T.R"\
+  --model_name "Qwen/Qwen3-30B-A3B-Instruct-2507"\
+  --exp_name "Qwen3-30B-ETR"\
   --train_dimension_filter "['nan','Explanations', 'Textual.Evidence', 'Rhetorical.Strategies']" \
   --resample_train
 
 
 python SoftT-main.py \
-  --exp_name "Llama-3.2-3B-A.T"\
+  --model_name "Qwen/Qwen3-30B-A3B-Instruct-2507"\
+  --exp_name "Qwen3-30B-AT"\
   --train_dimension_filter "['nan', 'Argument', 'Thesis']" \
   --resample_train
 
 
 python SoftT-main.py \
-  --exp_name "Llama-3.2-3B-O.L"\
+  --model_name "Qwen/Qwen3-30B-A3B-Instruct-2507"\
+  --exp_name "Qwen3-30B-OL"\
   --train_dimension_filter "['nan','Organization', 'Language']" \
   --resample_train
 
 
 
 
-python SoftT-main.py \
-  --model_name "meta-llama/Llama-3.1-70B-Instruct"\
-  --exp_name "Llama-3-70B-all"\
-  --train_size 20000 \
-  --gradient_checkpointing
+#python SoftT-main.py \
+#  --model_name "Qwen/Qwen3-30B-A3B-Instruct-2507"\
+#  --exp_name "Qwen3-30B"\
+#  --train_size 20000 \
+#  --gradient_checkpointing
+#
+#
+#python SoftT-main.py \
+#  --model_name "Qwen/Qwen3-30B-A3B-Instruct-2507"\
+#  --exp_name "Qwen3-30B-ETR"\
+#  --train_dimension_filter "['nan','Explanations', 'Textual.Evidence', 'Rhetorical.Strategies']" \
+#  --resample_train\
+#  --gradient_checkpointing
