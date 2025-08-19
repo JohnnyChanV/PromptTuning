@@ -20,7 +20,7 @@ from datasets import Dataset
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
-    TrainingArguments,
+    TrainingArguments, BitsAndBytesConfig,
 )
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from tqdm import tqdm
@@ -59,9 +59,22 @@ def read_text(path: str) -> str:
         return f.read()
 
 
-def prepare_model_and_tokenizer(model_name: str) -> Tuple[AutoModelForCausalLM, AutoTokenizer]:
+def prepare_model_and_tokenizer(model_name: str, quant: bool) -> Tuple[AutoModelForCausalLM, AutoTokenizer]:
     """加载模型与分词器，并设置 pad_token"""
-    model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
+    if not quant:
+        model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
+    else:
+        quant = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",  # 4-bit 正态量化
+            bnb_4bit_use_double_quant=True,  # 嵌套量化进一步省显存
+            bnb_4bit_compute_dtype=torch.bfloat16
+        )
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name, quantization_config=quant, torch_dtype=torch.bfloat16,
+            device_map="auto"
+        )
+
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
@@ -360,6 +373,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--fp16", action="store_true", default=False)
     parser.add_argument("--bf16", action="store_true", default=True)
     parser.add_argument("--gradient_checkpointing", action="store_true", default=False)
+    parser.add_argument("--quant", action="store_true", default=False)
     parser.add_argument("--save_strategy", type=str, default="steps", choices=["no", "epoch", "steps"])
     parser.add_argument("--save_steps", type=int, default=600)
 
@@ -377,7 +391,7 @@ if __name__ == "__main__":
     random.seed(args.seed)
 
     # 1) 加载模型与分词器
-    model, tokenizer = prepare_model_and_tokenizer(args.model_name)
+    model, tokenizer = prepare_model_and_tokenizer(args.model_name,args.quant)
 
     # 2) 构造 prefix tokens（可能会扩展词表）
     prefix_token_strs, prefix_token_ids, tokenizer, model = build_prefix_tokens(
