@@ -20,7 +20,6 @@ from datasets import Dataset
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
-    MllamaForConditionalGeneration,
     TrainingArguments,
 )
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
@@ -62,6 +61,7 @@ def read_text(path: str) -> str:
 
 from typing import Tuple
 import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 def _prefer_dtype() -> torch.dtype:
     """在支持的 GPU 上优先用 bfloat16，否则退回 float16。"""
@@ -71,7 +71,7 @@ def _prefer_dtype() -> torch.dtype:
             return torch.bfloat16
     return torch.float16
 
-def prepare_model_and_tokenizer(model_name: str, quant: bool):
+def prepare_model_and_tokenizer(model_name: str, quant: bool) -> Tuple[AutoModelForCausalLM, AutoTokenizer]:
     """
     加载模型与分词器，并设置 pad_token。
     - quant=False: 常规半精度（BF16/FP16）
@@ -82,18 +82,11 @@ def prepare_model_and_tokenizer(model_name: str, quant: bool):
     quant=False #TODO
 
     if not quant:
-        if 'vision' in model_name.lower():
-            model = MllamaForConditionalGeneration.from_pretrained(
-                model_name,
-                device_map="auto",
-                torch_dtype=dtype,
-            )
-        else:
-            model = AutoModelForCausalLM.from_pretrained(
-                model_name,
-                device_map="auto",
-                torch_dtype=dtype,
-            )
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name,
+            device_map="auto",
+            torch_dtype=dtype,
+        )
     else:
         try:
             # HQQ 后端：Transformers 原生量化配置
@@ -128,10 +121,10 @@ def prepare_model_and_tokenizer(model_name: str, quant: bool):
 def build_prefix_tokens(
     model_name: str,
     tokenizer: AutoTokenizer,
-    model,
+    model: AutoModelForCausalLM,
     num_prefix_tokens: int,
     force_strategy: Optional[str] = None,
-):
+) -> Tuple[List[str], List[int], AutoTokenizer, AutoModelForCausalLM]:
     """
     构造 prefix token 列表与其 id，并在需要时扩展词表。
     strategy:
@@ -246,7 +239,7 @@ def dataset_with_messages(
 
 
 def freeze_all_but_prefix_embeddings(
-    model,
+    model: AutoModelForCausalLM,
     prefix_token_ids: List[int],
     verbose: bool = True,
 ):
@@ -291,7 +284,7 @@ def build_data_collator(tokenizer: AutoTokenizer, model_name: str) -> DataCollat
 
 
 def build_trainer(
-    model,
+    model: AutoModelForCausalLM,
     train_dataset: Dataset,
     data_collator,
     args: argparse.Namespace,
@@ -330,7 +323,7 @@ def build_trainer(
 
 
 def run_eval_sample(
-    model,
+    model: AutoModelForCausalLM,
     tokenizer: AutoTokenizer,
     messages_list: List[List[Dict[str, str]]],
     gold_labels: List[str],
