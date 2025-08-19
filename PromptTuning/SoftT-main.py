@@ -20,7 +20,7 @@ from datasets import Dataset
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
-    TrainingArguments, BitsAndBytesConfig,
+    TrainingArguments, AqlmConfig,
 )
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from tqdm import tqdm
@@ -59,26 +59,62 @@ def read_text(path: str) -> str:
         return f.read()
 
 
+from typing import Tuple
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+def _prefer_dtype() -> torch.dtype:
+    """在支持的 GPU 上优先用 bfloat16，否则退回 float16。"""
+    if torch.cuda.is_available():
+        major, _ = torch.cuda.get_device_capability(0)
+        if major >= 8:   # Ampere/Hopper+
+            return torch.bfloat16
+    return torch.float16
+
 def prepare_model_and_tokenizer(model_name: str, quant: bool) -> Tuple[AutoModelForCausalLM, AutoTokenizer]:
-    """加载模型与分词器，并设置 pad_token"""
+    """
+    加载模型与分词器，并设置 pad_token。
+    - quant=False: 常规半精度（BF16/FP16）
+    - quant=True : 使用 HQQ 4-bit 量化（无需 bitsandbytes）
+      需先安装:  pip install -U hqq transformers
+    """
+    dtype = _prefer_dtype()
+
     if not quant:
-        model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name,
+            device_map="auto",
+            torch_dtype=dtype,
+        )
     else:
-        quant = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_quant_type="nf4",  # 4-bit 正态量化
-            bnb_4bit_use_double_quant=True,  # 嵌套量化进一步省显存
-            bnb_4bit_compute_dtype=torch.bfloat16
+        try:
+            # HQQ 后端：Transformers 原生量化配置
+            from transformers import HqqConfig
+        except Exception as e:
+            raise RuntimeError(
+                "量化后端 HQQ 未安装或 Transformers 版本过低。请先执行：\n"
+                "  pip install -U hqq transformers\n"
+                "若仍失败，检查 Transformers≥4.43 是否可用。\n"
+                f"原始错误：{e}"
+            )
+
+        quant_cfg = HqqConfig(
+            nbits=4,        # 4-bit 量化
+            group_size=64,  # 常见分组；显存/速度折中
+            # 你也可以按需加：axis=0/1、optimize=True 等高级参数
         )
         model = AutoModelForCausalLM.from_pretrained(
-            model_name, quantization_config=quant, torch_dtype=torch.bfloat16,
-            device_map="auto"
+            model_name,
+            device_map="auto",
+            torch_dtype=dtype,
+            quantization_config=quant_cfg,
         )
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
     return model, tokenizer
+
 
 
 def build_prefix_tokens(
