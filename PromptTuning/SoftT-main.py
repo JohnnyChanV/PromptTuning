@@ -79,6 +79,7 @@ def prepare_model_and_tokenizer(model_name: str, quant: bool) -> Tuple[AutoModel
       需先安装:  pip install -U hqq transformers
     """
     dtype = _prefer_dtype()
+    quant=False
 
     if not quant:
         model = AutoModelForCausalLM.from_pretrained(
