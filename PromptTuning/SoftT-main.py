@@ -257,7 +257,7 @@ def build_trainer(
         save_steps=args.save_steps,
     )
     optimizer = torch.optim.AdamW(
-        model.get_input_embeddings().weight,
+        [model.get_input_embeddings().weight],
         lr=args.learning_rate,  # 注意别和 targs.learning_rate 冲突
         weight_decay=args.weight_decay
     )
