@@ -20,7 +20,8 @@ from datasets import Dataset
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
-    TrainingArguments, AqlmConfig,
+    MllamaForConditionalGeneration,
+    TrainingArguments,
 )
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from tqdm import tqdm
@@ -61,7 +62,6 @@ def read_text(path: str) -> str:
 
 from typing import Tuple
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
 
 def _prefer_dtype() -> torch.dtype:
     """在支持的 GPU 上优先用 bfloat16，否则退回 float16。"""
@@ -71,7 +71,7 @@ def _prefer_dtype() -> torch.dtype:
             return torch.bfloat16
     return torch.float16
 
-def prepare_model_and_tokenizer(model_name: str, quant: bool) -> Tuple[AutoModelForCausalLM, AutoTokenizer]:
+def prepare_model_and_tokenizer(model_name: str, quant: bool):
     """
     加载模型与分词器，并设置 pad_token。
     - quant=False: 常规半精度（BF16/FP16）
@@ -79,14 +79,21 @@ def prepare_model_and_tokenizer(model_name: str, quant: bool) -> Tuple[AutoModel
       需先安装:  pip install -U hqq transformers
     """
     dtype = _prefer_dtype()
-    quant=False
+    quant=False #TODO
 
     if not quant:
-        model = AutoModelForCausalLM.from_pretrained(
-            model_name,
-            device_map="auto",
-            torch_dtype=dtype,
-        )
+        if 'vision' in model_name.lower():
+            model = MllamaForConditionalGeneration.from_pretrained(
+                model_name,
+                device_map="auto",
+                torch_dtype=dtype,
+            )
+        else:
+            model = AutoModelForCausalLM.from_pretrained(
+                model_name,
+                device_map="auto",
+                torch_dtype=dtype,
+            )
     else:
         try:
             # HQQ 后端：Transformers 原生量化配置
@@ -121,10 +128,10 @@ def prepare_model_and_tokenizer(model_name: str, quant: bool) -> Tuple[AutoModel
 def build_prefix_tokens(
     model_name: str,
     tokenizer: AutoTokenizer,
-    model: AutoModelForCausalLM,
+    model,
     num_prefix_tokens: int,
     force_strategy: Optional[str] = None,
-) -> Tuple[List[str], List[int], AutoTokenizer, AutoModelForCausalLM]:
+):
     """
     构造 prefix token 列表与其 id，并在需要时扩展词表。
     strategy:
@@ -239,7 +246,7 @@ def dataset_with_messages(
 
 
 def freeze_all_but_prefix_embeddings(
-    model: AutoModelForCausalLM,
+    model,
     prefix_token_ids: List[int],
     verbose: bool = True,
 ):
@@ -284,7 +291,7 @@ def build_data_collator(tokenizer: AutoTokenizer, model_name: str) -> DataCollat
 
 
 def build_trainer(
-    model: AutoModelForCausalLM,
+    model,
     train_dataset: Dataset,
     data_collator,
     args: argparse.Namespace,
@@ -323,7 +330,7 @@ def build_trainer(
 
 
 def run_eval_sample(
-    model: AutoModelForCausalLM,
+    model,
     tokenizer: AutoTokenizer,
     messages_list: List[List[Dict[str, str]]],
     gold_labels: List[str],
@@ -401,7 +408,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch_size", type=int, default=4)
     parser.add_argument("--warmup_ratio", type=float, default=0.1)
     parser.add_argument("--weight_decay", type=float, default=0.01)
-    parser.add_argument("--epochs", type=int, default=5)
+    parser.add_argument("--epochs", type=int, default=2)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--exp_name", type=str, default="Llama-3.2-3B-100-domain")
     parser.add_argument("--output_dir", type=str, default="/ix1/xli/zhc195/SoftPrompt_Tuning/outputs/")
