@@ -175,7 +175,8 @@ def prepare_train_data(
     if len(eval(args.train_dimension_filter)) > 0:
         new_data = [item for item in data if item['Dimension.Name'] in eval(args.train_dimension_filter)]
         data = new_data
-    # print(len(data))
+    global og_data_len
+    og_data_len = len(data)
 
     cnt = Counter([item["sem_label"] for item in data])
 
@@ -302,7 +303,7 @@ def build_trainer(
         weight_decay=args.weight_decay,
         lr_scheduler_type="linear",
         seed=args.seed,
-        output_dir=args.output_dir + args.exp_name,
+        output_dir=args.output_dir + f"{args.exp_name}-{og_data_len}",
         gradient_checkpointing=args.gradient_checkpointing,
         save_strategy=args.save_strategy,
         save_steps=args.save_steps,
