@@ -35,14 +35,14 @@ git pull
 
 python SoftT-main.py \
   --model_name "meta-llama/Llama-3.1-8B-Instruct"\
-  --exp_name "Llama-8B-ETR"\
+  --exp_name "Llama-8B-ETR-400"\
   --train_dimension_filter "['nan','Explanations', 'Textual.Evidence', 'Rhetorical.Strategies']" \
   --resample_train\
   --train_size 400
 
 python SoftT-main.py \
   --model_name "meta-llama/Llama-3.1-8B-Instruct"\
-  --exp_name "Llama-8B-AT"\
+  --exp_name "Llama-8B-AT-400"\
   --train_dimension_filter "['nan', 'Argument', 'Thesis']" \
   --resample_train\
   --train_size 400
@@ -50,7 +50,7 @@ python SoftT-main.py \
 
 python SoftT-main.py \
   --model_name "meta-llama/Llama-3.1-8B-Instruct"\
-  --exp_name "Llama-8B-OL"\
+  --exp_name "Llama-8B-OL-400"\
   --train_dimension_filter "['nan','Organization', 'Language']" \
   --resample_train\
   --train_size 400
