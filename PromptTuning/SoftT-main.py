@@ -385,7 +385,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model_name", type=str, default="meta-llama/Llama-3.2-3B-Instruct")
     parser.add_argument("--train_data", type=str, default="../RAG_data/proc_dev_data.json")
     parser.add_argument("--train_dimension_filter", type=str, default="[]")
-    parser.add_argument("--train_size", type=int, default=200)
+    parser.add_argument("--train_size", type=int, default=500)
     # choices = ['Organization', 'Explanations', 'Textual.Evidence', 'Rhetorical.Strategies', 'nan', 'Argument', 'Thesis', 'Language']
     parser.add_argument("--resample_train", action="store_true", default=False)
     parser.add_argument("--system_prompt_file", type=str, default="good_prompt.txt")
