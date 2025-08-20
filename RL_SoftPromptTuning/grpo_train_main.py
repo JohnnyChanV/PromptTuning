@@ -288,8 +288,7 @@ def build_trainer(
 
         temperature=0.6,
         use_vllm=True,
-        vllm_gpu_memory_utilization=.2,
-        vllm_device="auto",
+        # vllm_gpu_memory_utilization=.,
         report_to=["swanlab"]  # I'm disabling Wandb.
     )
 
