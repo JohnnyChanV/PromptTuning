@@ -393,7 +393,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--prompt_template", type=str, default=DEFAULT_PROMPT_TEMPLATE)
 
     # prefix
-    parser.add_argument("--num_prefix_tokens", type=int, default=30)
+    parser.add_argument("--num_prefix_tokens", type=int, default=50)
     parser.add_argument("--force_strategy", type=str, default=None,
                         choices=[None, "llama_reserved", "add_tokens"],
                         help="强制选择前缀策略；默认自动（Llama 用 reserved，其它模型 add tokens）")
