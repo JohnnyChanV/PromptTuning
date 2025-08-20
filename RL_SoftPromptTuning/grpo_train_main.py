@@ -25,7 +25,7 @@ from transformers import (
 from trl import GRPOConfig, GRPOTrainer
 from tqdm import tqdm
 
-from RL_SoftPromptTuning.reward import Rewards
+from reward import Rewards
 
 # =========================
 # 默认配置与常量
