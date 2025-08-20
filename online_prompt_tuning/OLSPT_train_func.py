@@ -4,6 +4,7 @@ from transformers import get_scheduler, GenerationConfig
 from torch.optim import AdamW
 from tqdm.auto import tqdm
 from trl.extras.vllm_client import VLLMClient
+import torch.nn.functional as F
 
 
 class SFTDataset(Dataset):
@@ -24,9 +25,9 @@ class SFTDataset(Dataset):
         }
 
 
-class small_OLSPTrainer:
+class OLSPTraining:
 
-    def __init__(self, args, model, tokenizer, train_data):
+    def __init__(self, args, model, tokenizer, train_data, answer_seperator="</think>"):
 
         self.model = model
         self.tokenizer = tokenizer
@@ -34,6 +35,7 @@ class small_OLSPTrainer:
         self.epochs = args.epochs
         self.batch_size = args.batch_size
         self.lr = args.learning_rate
+        self.answer_seperator=answer_seperator
 
         ## generation setup
         self.num_generations = 1
@@ -62,6 +64,7 @@ class small_OLSPTrainer:
                 top_p=self.top_p,
                 top_k=self.top_k,
                 min_p=self.min_p,
+                stop_strings=self.answer_seperator
                 # repetition_penalty=self.repetition_penalty,
                 # cache_implementation=args.cache_implementation,
             )
@@ -83,20 +86,21 @@ class small_OLSPTrainer:
         )
         return completion_ids
 
-
-    def regular_generate(self,ordered_set_of_prompts, prompt_ids,prompt_mask,return_all):
-
-        prompt_completion_ids = self.model.generate(
-                        prompt_ids, attention_mask=prompt_mask, generation_config=self.generation_config, output_scores=True
-                    )
+    def regular_generate(self, ordered_set_of_prompts, prompt_ids, prompt_mask, return_all):
+        prompt_completion_out = self.model.generate(
+            prompt_ids,
+            attention_mask=prompt_mask,
+            generation_config=self.generation_config,
+            output_scores=True,
+            return_dict_in_generate=True,  # <-- important
+        )
         if not return_all:
-            # Compute prompt length and extract completion ids
             prompt_length = prompt_ids.size(1)
-            prompt_ids = prompt_completion_ids[:, :prompt_length]
-            completion_ids = prompt_completion_ids[:, prompt_length:]
+            # sequences = [B, prompt_len + gen_len]
+            completion_ids = prompt_completion_out.sequences[:, prompt_length:]
             return completion_ids
         else:
-            return prompt_completion_ids
+            return prompt_completion_out  # has .sequences and .scores
 
     def customize_train_model(self):
         """
@@ -145,15 +149,73 @@ class small_OLSPTrainer:
                     prompt_completions_ids = outputs['sequences']
                     generated_logits = torch.stack(outputs['scores'], dim=1)  # [batch, gen_len, vocab_size]
                     ## TODO
+                    # ===== TODO 开始 =====
+
+                    # 保障右侧补齐与 pad/eos 合理性
+                    self.tokenizer.padding_side = "right"
+                    if self.tokenizer.pad_token_id is None:
+                        if self.tokenizer.eos_token_id is None:
+                            raise ValueError("tokenizer.eos_token_id 为空，请先设置 eos token。")
+                        # 常见做法：用 eos 作为 pad
+                        self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
+                        self.tokenizer.pad_token = self.tokenizer.eos_token
+
+                    eos_id = self.tokenizer.eos_token_id
+                    if eos_id is None:
+                        raise ValueError("tokenizer.eos_token_id 为空，请先设置 eos token。")
+
+                    device = self.model.device
+                    pc_ids = prompt_completions_ids.to(device)  # [B, L_pc]（当前“prompt+生成”序列）
+                    B, L_pc = pc_ids.size()
+
+                    # 1) 初始化 golden label_ids，全 -100，与当前序列等长
+                    label_ids = torch.full_like(pc_ids, fill_value=-100)
+
+                    # 2) 编码 sem_label，右侧 padding，并在每条序列末尾追加 EOS
+                    #    注意：不使用 add_special_tokens，由我们手动加 eos
+                    sem_tok = self.tokenizer(sem_labels, add_special_tokens=False)
+                    sem_input_ids = [ids + [eos_id] for ids in sem_tok.input_ids]  # List[List[int]]
+                    sem_attention_mask = [[1] * len(ids) for ids in sem_input_ids]  # 真实 token 置 1
+
+                    sem_batch = self.tokenizer.pad(
+                        {"input_ids": sem_input_ids, "attention_mask": sem_attention_mask},
+                        padding=True,
+                        return_tensors="pt",
+                        # 如需对齐 Tensor Core，可加：pad_to_multiple_of=8
+                    )
+
+                    sem_ids = sem_batch.input_ids.to(device)  # [B, L_sem]
+                    sem_amask = sem_batch.attention_mask.to(device)  # [B, L_sem]
+
+                    # 将 sem_label 的 token 拼到 label_ids 后，只在这些位置计算损失
+                    labels_concat = torch.cat([label_ids, sem_ids], dim=1)  # [B, L_pc + L_sem]
+
+                    # 3) 将 sem_label 的 token 拼到当前的 prompt_completions_ids 后，作为新输入
+                    input_ids_concat = torch.cat([pc_ids, sem_ids], dim=1)  # [B, L_pc + L_sem]
+                    attn_mask_concat = torch.cat(
+                        [torch.ones((B, L_pc), dtype=torch.long, device=device), sem_amask],
+                        dim=1
+                    )  # [B, L_pc + L_sem]
+
+                    # 4) 前向得到 logits，计算 CE（忽略 -100），标准 LM 左/右移对齐
+                    lm_out = model(input_ids=input_ids_concat, attention_mask=attn_mask_concat, use_cache=False)
+                    logits = lm_out.logits  # [B, L_total, V]
+
+                    shift_logits = logits[:, :-1, :].contiguous()
+                    shift_labels = labels_concat[:, 1:].contiguous()
+
+                    loss = F.cross_entropy(
+                        shift_logits.view(-1, shift_logits.size(-1)),
+                        shift_labels.view(-1),
+                        ignore_index=-100,
+                    )
+
+                    # ===== TODO 结束 =====
 
                 else:
                     completions_ids = None
                     raise Exception("Not Implemented")
 
-
-                batch = {k: v.to(device) for k, v in batch.items()}
-                outputs = model(**batch)
-                loss = outputs.loss
 
                 loss.backward()
 
