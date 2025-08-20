@@ -85,7 +85,7 @@ class Rewards:
         rewards = []
 
         for text, g_t in zip(completions, ground_truth):
-            judge = re.findall(r'<judge>(.*?)</judge>', text)
+            judge = re.findall(r'<answer>(.*?)</answer>', text)
             if len(judge) != 0:
                 judge = judge[0]
             else:
