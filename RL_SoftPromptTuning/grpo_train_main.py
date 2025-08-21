@@ -191,7 +191,7 @@ def dataset_with_messages(
             {"role": "assistant", "content": "<answer>" + row["sem_label"] + "</answer>"},
         ]
         return {
-            "text": tokenizer.apply_chat_template(
+            "prompt": tokenizer.apply_chat_template(
                 msgs, tokenize=False, add_generation_prompt=False, enable_thinking=False
             ),
             "message": msgs,
@@ -203,7 +203,7 @@ def dataset_with_messages(
             {"role": "user", "content": prompt_template.format(row["input"])},
         ]
         return {
-            "text": tokenizer.apply_chat_template(
+            "prompt": tokenizer.apply_chat_template(
                 msgs, tokenize=False, add_generation_prompt=True, enable_thinking=True
             ),
             "message": msgs,
