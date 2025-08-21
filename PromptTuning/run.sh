@@ -42,7 +42,7 @@ python SoftT-main.py \
 
 python SoftT-main.py \
   --model_name "meta-llama/Llama-3.1-8B-Instruct"\
-  --exp_name "Llama-8B-AT-400"\
+  --exp_name "Llama-8B-AT-1000"\
   --train_dimension_filter "['nan', 'Argument', 'Thesis']" \
   --resample_train\
   --train_size 1000
@@ -50,7 +50,7 @@ python SoftT-main.py \
 
 python SoftT-main.py \
   --model_name "meta-llama/Llama-3.1-8B-Instruct"\
-  --exp_name "Llama-8B-OL-400"\
+  --exp_name "Llama-8B-OL-1000"\
   --train_dimension_filter "['nan','Organization', 'Language']" \
   --resample_train\
   --train_size 1000
