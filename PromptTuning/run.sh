@@ -37,15 +37,17 @@ python SoftT-main.py \
   --model_name "meta-llama/Llama-3.2-3B-Instruct"\
   --exp_name "Llama-3B-ETR-500"\
   --train_dimension_filter "['nan','Explanations', 'Textual.Evidence', 'Rhetorical.Strategies']" \
-  --resample_train\
-  --train_size 500
+  --resample_train \
+  --train_size 500 \
+  --batch_size 16
 
 python SoftT-main.py \
   --model_name "meta-llama/Llama-3.2-3B-Instruct"\
   --exp_name "Llama-3B-AT-500"\
   --train_dimension_filter "['nan', 'Argument', 'Thesis']" \
   --resample_train\
-  --train_size 500
+  --train_size 500 \
+  --batch_size 16
 
 
 python SoftT-main.py \
@@ -53,7 +55,8 @@ python SoftT-main.py \
   --exp_name "Llama-3B-OL-500"\
   --train_dimension_filter "['nan','Organization', 'Language']" \
   --resample_train\
-  --train_size 500
+  --train_size 500 \
+  --batch_size 16
 
 
 
