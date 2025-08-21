@@ -292,6 +292,7 @@ def build_trainer(
     args: argparse.Namespace,
 ) -> SFTTrainer:
     targs = TrainingArguments(
+        run_name=f"{args.exp_name}",
         per_device_train_batch_size=args.batch_size,
         gradient_accumulation_steps=1,
         warmup_ratio=args.warmup_ratio,
