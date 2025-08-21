@@ -395,7 +395,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--weight_decay", type=float, default=0.01)
     parser.add_argument("--epochs", type=int, default=2)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--exp_name", type=str, default="Llama-3.2-3B-100-domain")
+    parser.add_argument("--exp_name", type=str, default="Qwen3-4B-GRPO")
     parser.add_argument("--output_dir", type=str, default="/ix1/xli/zhc195/SoftPrompt_Tuning/outputs/")
 
     # 精度 & 训练细节
