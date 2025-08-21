@@ -285,7 +285,7 @@ def build_trainer(
         num_generations=4,
         max_prompt_length=1024,
         max_completion_length=2048,
-        vllm_mode='colocate',
+        # vllm_mode='colocate',
         temperature=0.6,
         use_vllm=True,
         # vllm_gpu_memory_utilization=.,
