@@ -35,11 +35,12 @@ git pull
 
 python SoftT-main.py \
   --model_name "meta-llama/Llama-3.2-3B-Instruct"\
-  --exp_name "Llama-3B-ETR-500"\
+  --exp_name "Llama-3B-ETR-600"\
   --train_dimension_filter "['nan','Explanations', 'Textual.Evidence', 'Rhetorical.Strategies']" \
   --resample_train \
-  --train_size 500 \
-  --batch_size 16
+  --train_size 600 \
+  --batch_size 4 \
+  --epoch 5
 
 python SoftT-main.py \
   --model_name "meta-llama/Llama-3.2-3B-Instruct"\
