@@ -280,8 +280,8 @@ def build_trainer(
         save_strategy=args.save_strategy,
         save_steps=args.save_steps,
 
-        per_device_train_batch_size=1,
-        gradient_accumulation_steps=1,
+        per_device_train_batch_size=2,
+        gradient_accumulation_steps=2,
         num_generations=4,
         max_prompt_length=1024,
         max_completion_length=2048,
