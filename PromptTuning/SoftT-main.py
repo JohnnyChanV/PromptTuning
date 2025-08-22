@@ -169,7 +169,6 @@ def prepare_train_data(
 ) -> List[Dict[str, Any]]:
     data = load_json(path)
     for item in data:
-        # 兼容原始字段
         item["sem_label"] = semantic_label_map[item["label"]]
         # item["Dimension.Name"] = str(item.get("Dimension.Name", ""))
     # 打印分布，便于 sanity check
@@ -178,7 +177,7 @@ def prepare_train_data(
         data = new_data
     global og_data_len
     og_data_len = len(data)
-
+    print(f"[Info] Dataset Size: {og_data_len}")
     cnt = Counter([item["sem_label"] for item in data])
 
     if args.resample_train:
