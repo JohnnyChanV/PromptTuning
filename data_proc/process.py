@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 
 data = pd.read_excel("data_proc/highschoolAPEng_Comment_data.xlsx",sheet_name="coded for explanation")
 data = data[['Com.No','Comment.Num','Dimension.Name','Comment','Explanation (human code)']]
-data.fillna("null",inplace=True)
+data.dropna(subset="Comment",inplace=True)
 
 data['input'] = data['Comment']
 data['label'] = data['Explanation (human code)']
@@ -22,5 +22,5 @@ from collections import Counter
 
 Counter([item['Dimension.Name'] for item in records])
 
-json.dump(test,open("data_proc/proc_test_data.json",'w'),ensure_ascii=False,default=str)
-json.dump(dev,open("data_proc/proc_dev_data.json",'w'),ensure_ascii=False,default=str)
+json.dump(test,open("data_proc/proc_test_data.json",'w'),ensure_ascii=False)
+json.dump(dev,open("data_proc/proc_dev_data.json",'w'),ensure_ascii=False)
