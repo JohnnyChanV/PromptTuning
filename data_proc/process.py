@@ -3,6 +3,8 @@ import json
 from sklearn.model_selection import train_test_split
 
 data = pd.read_excel("data_proc/highschoolAPEng_Comment_data.xlsx",sheet_name="coded for explanation")
+data = data[['Com.No','Comment.Num','Dimension.Name','Comment','Explanation (human code)']]
+data.fillna("null",inplace=True)
 
 data['input'] = data['Comment']
 data['label'] = data['Explanation (human code)']
