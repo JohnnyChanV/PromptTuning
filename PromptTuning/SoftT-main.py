@@ -168,6 +168,7 @@ def prepare_train_data(
     semantic_label_map: Dict[int, str],
 ) -> List[Dict[str, Any]]:
     data = load_json(path)
+    print(data)
     for item in data:
         item["sem_label"] = semantic_label_map[item["label"]]
         # item["Dimension.Name"] = str(item.get("Dimension.Name", ""))
