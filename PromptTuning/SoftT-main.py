@@ -168,13 +168,12 @@ def prepare_train_data(
     semantic_label_map: Dict[int, str],
 ) -> List[Dict[str, Any]]:
     data = load_json(path)
-    print(data)
     for item in data:
         item["sem_label"] = semantic_label_map[item["label"]]
         # item["Dimension.Name"] = str(item.get("Dimension.Name", ""))
     # 打印分布，便于 sanity check
     if len(eval(args.train_dimension_filter)) > 0:
-        new_data = [item for item in data if item['Dimension.Name'] in eval(args.train_dimension_filter)]
+        new_data = [item for item in data if item['Dimension.Name'] in [i.lower() for i in eval(args.train_dimension_filter)]]
         data = new_data
     global og_data_len
     og_data_len = len(data)
