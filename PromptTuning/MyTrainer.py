@@ -30,8 +30,8 @@ class MyTrainer(SFTTrainer):
                 outputs = self.model.generate(
                     input_ids,
                     max_new_tokens=128,
-                    do_sample=True,
-                    temperature=0.6,
+                    do_sample=False,
+                    # temperature=0.6,
                     pad_token_id=self.tokenizer.eos_token_id,
                 )
             response_ids = outputs[0][input_ids.shape[-1]:]
