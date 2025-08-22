@@ -313,6 +313,7 @@ def build_trainer(
         gradient_checkpointing=args.gradient_checkpointing,
         save_strategy=args.save_strategy,
         save_steps=args.save_steps,
+        eval_strategy='epoch'
     )
     optimizer = torch.optim.AdamW(
         [model.get_input_embeddings().weight],
