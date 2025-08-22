@@ -20,7 +20,7 @@ class MyTrainer(SFTTrainer):
         preds, labels = [], []
         for example in dataset:
             # 构造输入
-            input_ids = self.tokenizer.apply_chat_template(
+            input_ids = self.processing_class.apply_chat_template(
                 example["message"],
                 add_generation_prompt=True,
                 return_tensors="pt"
