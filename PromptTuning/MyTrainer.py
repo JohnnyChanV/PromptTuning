@@ -32,10 +32,10 @@ class MyTrainer(SFTTrainer):
                     max_new_tokens=128,
                     do_sample=False,
                     # temperature=0.6,
-                    pad_token_id=self.tokenizer.eos_token_id,
+                    pad_token_id=self.processing_class.eos_token_id,
                 )
             response_ids = outputs[0][input_ids.shape[-1]:]
-            response = self.tokenizer.decode(response_ids, skip_special_tokens=False)
+            response = self.processing_class.decode(response_ids, skip_special_tokens=False)
             pred = parse_value_from_xml_with_regex(response, "answer")
 
             preds.append(pred)
