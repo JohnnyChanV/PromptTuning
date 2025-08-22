@@ -1,5 +1,6 @@
 import re
 from sklearn.metrics import cohen_kappa_score
+from tqdm import tqdm
 from trl import SFTTrainer
 import  torch
 
@@ -18,7 +19,7 @@ class MyTrainer(SFTTrainer):
 
         self.model.eval()
         preds, labels = [], []
-        for example in dataset:
+        for example in tqdm(dataset):
             # 构造输入
             input_ids = self.processing_class.apply_chat_template(
                 example["message"],
