@@ -22,7 +22,8 @@ from transformers import (
     AutoTokenizer,
     TrainingArguments,
 )
-from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
+from trl import DataCollatorForCompletionOnlyLM
+from MyTrainer import MyTrainer as SFTTrainer
 from tqdm import tqdm
 
 
