@@ -20,8 +20,5 @@ from collections import Counter
 
 Counter([item['Dimension.Name'] for item in records])
 
-for key in test[0].keys():
-    print(type(test[0][key]))
-
 json.dump(test,open("data_proc/proc_test_data.json",'w'),ensure_ascii=False,default=str)
-json.dump(test,open("data_proc/proc_dev_data.json",'w'),ensure_ascii=False,default=str)
+json.dump(dev,open("data_proc/proc_dev_data.json",'w'),ensure_ascii=False,default=str)
