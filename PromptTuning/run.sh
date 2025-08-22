@@ -35,28 +35,28 @@ git pull
 
 python SoftT-main.py \
   --model_name "meta-llama/Llama-3.1-8B-Instruct"\
-  --exp_name "Llama-8B-ETR-500-bs4"\
-  --train_dimension_filter "['nan','Explanations', 'Textual.Evidence', 'Rhetorical.Strategies']" \
+  --exp_name "Llama-8B-ETR-500-bs8"\
+  --train_dimension_filter "['Explanations', 'Textual.Evidence', 'Rhetorical.Strategies']" \
   --resample_train\
   --train_size 500\
-  --batch_size 4
+  --batch_size 8
 
 python SoftT-main.py \
   --model_name "meta-llama/Llama-3.1-8B-Instruct"\
-  --exp_name "Llama-8B-AT-500-bs4"\
-  --train_dimension_filter "['nan', 'Argument', 'Thesis']" \
+  --exp_name "Llama-8B-AT-500-bs8"\
+  --train_dimension_filter "['Argument', 'Thesis']" \
   --resample_train\
   --train_size 500\
-  --batch_size 4
+  --batch_size 8
 
-#
-#python SoftT-main.py \
-#  --model_name "meta-llama/Llama-3.1-8B-Instruct"\
-#  --exp_name "Llama-8B-OL-500-bs4"\
-#  --train_dimension_filter "['nan','Organization', 'Language']" \
-#  --resample_train\
-#  --train_size 500\
-#  --batch_size 4
+
+python SoftT-main.py \
+  --model_name "meta-llama/Llama-3.1-8B-Instruct"\
+  --exp_name "Llama-8B-OL-500-bs8"\
+  --train_dimension_filter "['Organization', 'Language']" \
+  --resample_train\
+  --train_size 500\
+  --batch_size 8
 
 
 

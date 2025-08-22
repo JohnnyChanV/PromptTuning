@@ -191,16 +191,21 @@ def prepare_train_data(
 
     print(f"[Info] label distribution (top 10): {cnt}")
 
-    # if len(eval(args.train_dimension_filter))!=0:
-    #     times = len(eval(args.train_dimension_filter))
-    # else:
-    #     times = 1
-    #
-    # print(f"[Info] Training set right bound: {args.train_size*times}")
     times = 1
     return data[:args.train_size*times]
 
+def prepare_eval_data(
+    path: str,
+    semantic_label_map: Dict[int, str],
+) -> List[Dict[str, Any]]:
+    data = load_json(path)
+    for item in data:
+        # 兼容原始字段
+        item["sem_label"] = semantic_label_map[item["label"]]
+        # item["Dimension.Name"] = str(item.get("Dimension.Name", ""))
 
+    # print(f"[Info] label distribution (top 10): {cnt}")
+    return data
 def dataset_with_messages(
     data: List[Dict[str, Any]],
     tokenizer: AutoTokenizer,
@@ -462,7 +467,7 @@ if __name__ == "__main__":
         seed=args.seed,
     )
 
-    eval_data = prepare_train_data(args.eval_data, SEMANTIC_LABEL)
+    eval_data = prepare_eval_data(args.eval_data, SEMANTIC_LABEL)
     eval_dataset = dataset_with_messages(
         eval_data,
         tokenizer=tokenizer,
