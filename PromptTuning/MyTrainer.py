@@ -3,6 +3,7 @@ from sklearn.metrics import cohen_kappa_score
 from tqdm import tqdm
 from trl import SFTTrainer
 import  torch
+import swanlab
 
 def parse_value_from_xml_with_regex(xml_string: str, tag_name: str) -> str:
     """从简单 XML 片段中提取内容"""
@@ -49,4 +50,6 @@ class MyTrainer(SFTTrainer):
             "gen_accuracy": acc,
             "cohen_kappa": kappa
         }
+        print(metrics)
+        swanlab.log(metrics)
         return metrics
