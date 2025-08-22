@@ -171,7 +171,7 @@ def prepare_train_data(
     for item in data:
         # 兼容原始字段
         item["sem_label"] = semantic_label_map[item["label"]]
-        item["Dimension.Name"] = str(item.get("Dimension.Name", ""))
+        # item["Dimension.Name"] = str(item.get("Dimension.Name", ""))
     # 打印分布，便于 sanity check
     if len(eval(args.train_dimension_filter)) > 0:
         new_data = [item for item in data if item['Dimension.Name'] in eval(args.train_dimension_filter)]
@@ -318,6 +318,7 @@ def build_trainer(
     trainer = SFTTrainer(
         model=model,
         train_dataset=train_dataset,
+        eval_dataset=eval_dataset,
         args=targs,
         data_collator=data_collator,
         processing_class=tokenizer,
@@ -386,7 +387,8 @@ def parse_args() -> argparse.Namespace:
 
     # 模型 & 数据
     parser.add_argument("--model_name", type=str, default="meta-llama/Llama-3.2-3B-Instruct")
-    parser.add_argument("--train_data", type=str, default="../RAG_data/proc_dev_data.json")
+    parser.add_argument("--train_data", type=str, default="../data_proc/proc_dev_data.json")
+    parser.add_argument("--eval_data", type=str, default="../data_proc/proc_test_data.json")
     parser.add_argument("--train_dimension_filter", type=str, default="[]")
     parser.add_argument("--train_size", type=int, default=500)
     # choices = ['Organization', 'Explanations', 'Textual.Evidence', 'Rhetorical.Strategies', 'nan', 'Argument', 'Thesis', 'Language']
@@ -447,7 +449,7 @@ if __name__ == "__main__":
     prefix = "".join(prefix_token_strs[: args.num_prefix_tokens])
     system_prompt_raw = read_text(args.system_prompt_file)
     system_prompt = prefix + "\n" + system_prompt_raw
-    print(system_prompt)
+    # print(system_prompt)
 
     # 4) 准备训练数据与数据集
     train_data = prepare_train_data(args.train_data, SEMANTIC_LABEL)
@@ -459,13 +461,23 @@ if __name__ == "__main__":
         add_answer=True,
         seed=args.seed,
     )
-    print(train_dataset[0])
+
+    eval_data = prepare_train_data(args.eval_data, SEMANTIC_LABEL)
+    eval_dataset = dataset_with_messages(
+        eval_data,
+        tokenizer=tokenizer,
+        system_prompt=system_prompt,
+        prompt_template=args.prompt_template,
+        add_answer=False,
+        seed=args.seed,
+    )
+    # print(train_dataset[0])
 
     # 5) 冻结参数，仅训练 prefix 对应的 embedding 行（通过 grad hook 局部放行）
     hook_handle = freeze_all_but_prefix_embeddings(model, prefix_token_ids, verbose=True)
 
     # 6) collator & trainer
-    tokenizer.save_pretrained(args.output_dir + args.exp_name + '/tokenizer')
+    tokenizer.save_pretrained(args.output_dir + args.exp_name + '-tokenizer')
     collator = build_data_collator(tokenizer, args.model_name)
     trainer = build_trainer(model, train_dataset, collator, args)
 
@@ -475,11 +487,5 @@ if __name__ == "__main__":
     # 8) 清理 hook
     hook_handle.remove()
     model.eval()
-
-    # 9) 可选：快速评估若干条样本（用训练数据的 message 演示）
-    if args.eval_sample_n and args.eval_sample_n > 0:
-        messages_list = [ex["message"] for ex in train_dataset.select(range(min(args.eval_sample_n, len(train_dataset))))]
-        gold_labels = [ex["sem_label"] for ex in train_data[: len(messages_list)]]
-        run_eval_sample(model, tokenizer, messages_list, gold_labels, sample_n=args.eval_sample_n)
 
     print("[Done] Training finished.")
