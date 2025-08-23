@@ -36,17 +36,17 @@ class MyTrainer(SFTTrainer):
                         {"role": "assistant", "content": "<answer>With Explanation</answer>"}],
                     add_generation_prompt=False,
                     return_tensors="pt"
-                ).unsqueeze(0)
+                )
 
                 neg_ids = self.processing_class.apply_chat_template(
                     example["message"] + [
                         {"role": "assistant", "content": "<answer>Without Explanation</answer>"}],
                     add_generation_prompt=False,
                     return_tensors="pt"
-                ).unsqueeze(0)
+                )
 
-                all_ids.append(pos_ids)
-                all_ids.append(neg_ids)
+                all_ids.append(pos_ids.squeeze(0))
+                all_ids.append(neg_ids.squeeze(0))
                 all_labels.append(example["sem_label"])
 
             # pad 成统一长度 (2 * batch_size, max_len)
