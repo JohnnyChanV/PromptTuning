@@ -22,6 +22,7 @@ from transformers import (
     AutoTokenizer,
     TrainingArguments,
 )
+from transformers.trainer_utils import get_last_checkpoint
 from trl import DataCollatorForCompletionOnlyLM
 from MyTrainer import MyTrainer as SFTTrainer
 from tqdm import tqdm
@@ -423,6 +424,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--bf16", action="store_true", default=True)
     parser.add_argument("--gradient_checkpointing", action="store_true", default=False)
     parser.add_argument("--quant", action="store_true", default=False)
+    parser.add_argument("--resume", action="store_true", default=False)
     parser.add_argument("--save_strategy", type=str, default="epoch", choices=["no", "epoch", "steps"])
     parser.add_argument("--save_steps", type=int, default=100)
 
@@ -488,7 +490,12 @@ if __name__ == "__main__":
     trainer = build_trainer(model, train_dataset, collator, args)
 
     # 7) 训练
-    trainer.train()
+    if not args.resume:
+        trainer.train()
+    else:
+        output_dir = args.output_dir + f"{args.exp_name}-{og_data_len}",
+        last_ckpt = get_last_checkpoint(output_dir)  # 例如返回 "out/checkpoint-12345"
+        trainer.train(resume_from_checkpoint=last_ckpt)
 
     # 8) 清理 hook
     hook_handle.remove()
