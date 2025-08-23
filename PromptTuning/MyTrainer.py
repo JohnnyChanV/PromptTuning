@@ -31,6 +31,7 @@ class MyTrainer(SFTTrainer):
             all_ids = []
             all_labels = []
             for example in batch:
+                print(example)
                 pos_ids = self.processing_class.apply_chat_template(
                     example["message"] + [
                         {"role": "assistant", "content": "<answer>With Explanation</answer>"}],
