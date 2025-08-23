@@ -36,14 +36,14 @@ class MyTrainer(SFTTrainer):
                         {"role": "assistant", "content": "<answer>With Explanation</answer>"}],
                     add_generation_prompt=False,
                     return_tensors="pt"
-                )[0]
+                ).unsqueeze(0)
 
                 neg_ids = self.processing_class.apply_chat_template(
                     example["message"] + [
                         {"role": "assistant", "content": "<answer>Without Explanation</answer>"}],
                     add_generation_prompt=False,
                     return_tensors="pt"
-                )[0]
+                ).unsqueeze(0)
 
                 all_ids.append(pos_ids)
                 all_ids.append(neg_ids)
