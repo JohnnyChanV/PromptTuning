@@ -493,7 +493,7 @@ if __name__ == "__main__":
     if not args.resume:
         trainer.train()
     else:
-        output_dir = args.output_dir + f"{args.exp_name}-{og_data_len}",
+        output_dir = args.output_dir + f"{args.exp_name}-{og_data_len}"
         last_ckpt = get_last_checkpoint(output_dir)  # 例如返回 "out/checkpoint-12345"
         trainer.train(resume_from_checkpoint=last_ckpt)
 
