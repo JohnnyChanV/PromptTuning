@@ -52,7 +52,7 @@ class CandidateCollator:
 
 
 class MyTrainer(SFTTrainer):
-    def evaluate(self, eval_dataset=None, batch_size: int = 32, **kwargs):
+    def evaluate(self, eval_dataset=None, batch_size: int = 16, **kwargs):
         dataset = eval_dataset or self.eval_dataset
         if dataset is None:
             raise ValueError("No eval_dataset provided")
