@@ -204,7 +204,7 @@ def prepare_eval_data(
         # item["Dimension.Name"] = str(item.get("Dimension.Name", ""))
 
     # print(f"[Info] label distribution (top 10): {cnt}")
-    return data[:2000]
+    return data[:1000]
 def dataset_with_messages(
     data: List[Dict[str, Any]],
     tokenizer: AutoTokenizer,
