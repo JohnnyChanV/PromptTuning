@@ -59,7 +59,7 @@ python SoftT-main.py \
   --resample_train\
   --train_size 500\
   --batch_size 4\
-  --epochs 10
+  --epochs 20
 
 
 
