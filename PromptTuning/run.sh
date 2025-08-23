@@ -47,7 +47,7 @@ python SoftT-main.py \
   --train_dimension_filter "['Argument', 'Thesis']" \
   --resample_train\
   --train_size 500\
-  --batch_size 8=4
+  --batch_size 4
 
 
 python SoftT-main.py \

@@ -1,9 +1,11 @@
-import re
+import torch
+import torch.nn.functional as F
 from sklearn.metrics import cohen_kappa_score
 from tqdm import tqdm
-from trl import SFTTrainer
-import  torch
 import swanlab
+from trl import SFTTrainer
+import re
+
 
 def parse_value_from_xml_with_regex(xml_string: str, tag_name: str) -> str:
     """从简单 XML 片段中提取内容"""
@@ -21,28 +23,44 @@ class MyTrainer(SFTTrainer):
         self.model.eval()
         preds, labels = [], []
         for example in tqdm(dataset):
-            # 构造输入
-            input_ids = self.processing_class.apply_chat_template(
-                example["message"],
-                add_generation_prompt=True,
+            # 构造两个候选
+            pos_ids = self.processing_class.apply_chat_template(
+                example["message"] + [
+                    {"role": "assistant", "content": "<answer>With Explanation</answer>"}],
+                add_generation_prompt=False,
                 return_tensors="pt"
-            ).to(self.model.device)
+            )
+            neg_ids = self.processing_class.apply_chat_template(
+                example["message"] + [
+                    {"role": "assistant", "content": "<answer>Without Explanation</answer>"}],
+                add_generation_prompt=False,
+                return_tensors="pt"
+            )
 
+            # 拼成 batch，一次 forward
+            input_ids = torch.cat([pos_ids, neg_ids], dim=0).to(self.model.device)
             with torch.no_grad():
-                outputs = self.model.generate(
-                    input_ids,
-                    max_new_tokens=128,
-                    do_sample=True,
-                    temperature=1,
-                    pad_token_id=self.processing_class.eos_token_id,
-                )
-            response_ids = outputs[0][input_ids.shape[-1]:]
-            response = self.processing_class.decode(response_ids, skip_special_tokens=False)
-            pred = parse_value_from_xml_with_regex(response, "answer")
+                outputs = self.model(input_ids)
+                logits = outputs.logits
+
+            # 计算每个序列的 log-likelihood (逐 token)
+            seq_logprobs = []
+            for i in range(input_ids.size(0)):
+                ids = input_ids[i]
+                # shift：预测 token 对应 label = 下一 token
+                target_ids = ids[1:]
+                pred_logits = logits[i, :-1, :]   # 对应 target_ids
+                log_probs = F.log_softmax(pred_logits, dim=-1)
+                token_log_probs = log_probs[range(len(target_ids)), target_ids]
+                seq_logprobs.append(token_log_probs.sum().item())
+
+            pos_score, neg_score = seq_logprobs
+            pred = "With Explanation" if pos_score > neg_score else "Without Explanation"
 
             preds.append(pred)
             labels.append(example["sem_label"])
 
+        # 计算指标
         acc = sum(p == l for p, l in zip(preds, labels)) / len(labels)
         kappa = cohen_kappa_score(labels, preds)
 
