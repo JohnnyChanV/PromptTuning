@@ -52,14 +52,14 @@ git pull
 #  --epochs 10
 
 
-python SoftT-main.py \
-  --model_name "meta-llama/Llama-3.1-8B-Instruct"\
-  --exp_name "Llama-8B-OL-500-bs4"\
-  --train_dimension_filter "['Organization', 'Language']" \
-  --resample_train\
-  --train_size 500\
-  --batch_size 4\
-  --epochs 20
+#python SoftT-main.py \
+#  --model_name "meta-llama/Llama-3.1-8B-Instruct"\
+#  --exp_name "Llama-8B-OL-500-bs4"\
+#  --train_dimension_filter "['Organization', 'Language']" \
+#  --resample_train\
+#  --train_size 500\
+#  --batch_size 4\
+#  --epochs 20
 
 
 
@@ -78,3 +78,18 @@ python SoftT-main.py \
 #  --train_dimension_filter "['nan','Explanations', 'Textual.Evidence', 'Rhetorical.Strategies']" \
 #  --resample_train\
 #  --gradient_checkpointing
+
+
+
+
+
+python SoftT-main.py \
+  --model_name "Qwen/Qwen3-14B"\
+  --exp_name "Qwen3-14B-ETR-500-bs4"\
+  --train_dimension_filter "['Explanations', 'Textual.Evidence', 'Rhetorical.Strategies']" \
+  --resample_train\
+  --train_size 500\
+  --batch_size 4\
+  --epochs 10
+
+

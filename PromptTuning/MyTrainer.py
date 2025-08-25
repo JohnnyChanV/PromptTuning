@@ -29,6 +29,7 @@ class CandidateCollator:
                     example["message"] + [
                         {"role": "assistant", "content": f"<answer>{cand}</answer>"}],
                     add_generation_prompt=False,
+                    enable_thinking=False,
                     return_tensors="pt"
                 )[0]
                 all_ids.append(ids)
